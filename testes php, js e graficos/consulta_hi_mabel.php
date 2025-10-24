@@ -8,7 +8,7 @@ $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
 
 // Consulta SQL — busca a data e a temperatura interna
-$sql = "SELECT datahora, ti
+$sql = "SELECT datahora, hi
         FROM leituramabel
         WHERE datahora BETWEEN :inicio AND :fim
         ORDER BY datahora ASC";
@@ -38,7 +38,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
   </style>
 </head>
 <body>
-  <h2>Temperaturas Internas (Campo: ti)</h2>
+  <h2>umidade Interna (Campo: ti)</h2>
 
   <!-- Filtro de data -->
   <form method="get">
@@ -53,14 +53,14 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
   <table>
     <tr>
       <th>Data e Hora</th>
-      <th>Temperatura Interna (°C)</th>
+      <th>Umidade Interna (°C)</th>
     </tr>
 
     <?php if (count($resultado) > 0): ?>
       <?php foreach ($resultado as $linha): ?>
         <tr>
           <td><?php echo htmlspecialchars($linha['datahora']); ?></td>
-          <td><?php echo htmlspecialchars($linha['ti']); ?></td>
+          <td><?php echo htmlspecialchars($linha['hi']); ?></td>
         </tr>
       <?php endforeach; ?>
     <?php else: ?>
