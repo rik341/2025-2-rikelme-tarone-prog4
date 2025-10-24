@@ -162,3 +162,64 @@ body {
     font-weight: bold;
     color: #222;
   }
+.grafico-section {
+  background-color: #f9f9f9;
+  padding: 80px 60px;
+  text-align: center;
+}
+
+.grafico-section h1 {
+  color: #0c3e1e;
+  font-size: 32px;
+  margin-bottom: 40px;
+}
+
+form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+form label {
+  font-weight: bold;
+  color: #1b4d25;
+}
+
+form input,
+form button {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+form button {
+  background-color: #1ea44e;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+form button:hover {
+  background-color: #148c3e;
+}
+
+canvas {
+  max-width: 900px;
+  width: 100%;
+  height: 400px;
+  margin: 40px auto;
+  display: block;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+}
+
+.loading {
+  font-size: 18px;
+  color: #1b4d25;
+  margin-bottom: 20px;
+}
