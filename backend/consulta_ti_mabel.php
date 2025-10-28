@@ -1,17 +1,17 @@
 <?php
 include 'conecta_mysql.php';
 
-//require_once "caminho relativo/mysql_connection.php"
-
 // Define o período (com valores padrão)
 $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
 
-// Consulta SQL — busca a data e a temperatura interna
-$sql = "SELECT datahora, ti
+// Consulta SQL — junta data e hora reais da inclusão
+$sql = "SELECT 
+          CONCAT(datainclusao, ' ', horainclusao) AS datahora_completa,
+          ti
         FROM leituramabel
-        WHERE datahora BETWEEN :inicio AND :fim
-        ORDER BY datahora ASC";
+        WHERE datainclusao BETWEEN :inicio AND :fim
+        ORDER BY datainclusao, horainclusao ASC";
 
 $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
@@ -38,7 +38,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
   </style>
 </head>
 <body>
-  <h2>Temperaturas Internas (Campo: ti)</h2>
+  <h2>Temperatura Externa (Campo: ti)</h2>
 
   <!-- Filtro de data -->
   <form method="get">
@@ -53,13 +53,13 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
   <table>
     <tr>
       <th>Data e Hora</th>
-      <th>Temperatura Interna (°C)</th>
+      <th>Temperatura interna (%)</th>
     </tr>
 
     <?php if (count($resultado) > 0): ?>
       <?php foreach ($resultado as $linha): ?>
         <tr>
-          <td><?php echo htmlspecialchars($linha['datahora']); ?></td>
+          <td><?php echo htmlspecialchars($linha['datahora_completa']); ?></td>
           <td><?php echo htmlspecialchars($linha['ti']); ?></td>
         </tr>
       <?php endforeach; ?>
