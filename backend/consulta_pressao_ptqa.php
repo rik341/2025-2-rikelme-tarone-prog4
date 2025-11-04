@@ -8,10 +8,10 @@ $data_final   = $_GET['fim'] ?? '2025-06-30';
 // Consulta SQL — busca a data e a temperatura interna
 $sql = "SELECT 
           CONCAT(dataleitura, ' ', horaleitura) AS datahora_completa,
-          eco2
+          pressao
         FROM leituraptqa
         WHERE dataleitura BETWEEN :inicio AND :fim
-            AND eco2 > 1000
+            AND pressao < 1000
         ORDER BY dataleitura, horaleitura ASC";
 
 $stmt = $conecta->prepare($sql);
@@ -30,7 +30,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Consulta de registros: nível de CO2 maior que 1000 ppm- PTQA</title>
+  <title>Consulta de registros: pressão atmosférica menor que 1000 hPa- PTQA</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 40px; }
     table { border-collapse: collapse; width: 60%; margin-top: 20px; }
@@ -39,7 +39,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
   </style>
 </head>
 <body>
-  <h2>Registros: nível de CO2 maior que 1000 ppm- PTQA</h2>
+  <h2>Registros: pressão atmosférica menor que 1000 hPa</h2>
 
   <!-- Filtro de data -->
   <form method="get">
@@ -54,14 +54,14 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
   <table>
     <tr>
       <th>Data e Hora</th>
-      <th>Registros: nível de CO2 maior que 1000 ppm- PTQA</th>
+      <th>Registros: pressão atmosférica menor que 1000 hPa- PTQA</th>
     </tr>
 
     <?php if (count($resultado) > 0): ?>
       <?php foreach ($resultado as $linha): ?>
         <tr>
           <td><?php echo htmlspecialchars($linha['datahora_completa']); ?></td>
-          <td><?php echo htmlspecialchars($linha['eco2']); ?></td>
+          <td><?php echo htmlspecialchars($linha['pressao']); ?></td>
         </tr>
       <?php endforeach; ?>
     <?php else: ?>
