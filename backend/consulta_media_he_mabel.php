@@ -16,7 +16,16 @@ $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $media = $resultado['media_umidade_externa'] ?? null;
+
+// Se for pedido no formato JSON (para o gráfico no futuro)
+if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode($resultado);
+  exit;
+}
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="pt-br">
