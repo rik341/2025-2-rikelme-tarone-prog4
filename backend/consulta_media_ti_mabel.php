@@ -1,11 +1,12 @@
+
 <?php
 include 'conecta_mysql.php';
 
-// Define o período (com valores padrão)
+// Define o período
 $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
 
-// Consulta SQL — calcula a média da temperatura interna no intervalo
+// monta a consulta SQL — calcula a media da temperatura
 $sql = "SELECT 
           ROUND(AVG(ti), 2) AS media_temperatura_interna
         FROM leituramabel
@@ -40,7 +41,7 @@ $media = $resultado['media_temperatura_interna'] ?? null;
 <body>
   <h2>Média da Temperatura Interna da Colmeia (Campo: <code>ti</code>)</h2>
 
-  <!-- Filtro de período -->
+  <!-- filtro de periodo -->
   <form method="get">
     <label>Data inicial:</label>
     <input type="date" name="inicio" value="<?php echo htmlspecialchars($data_inicial); ?>">
@@ -49,6 +50,7 @@ $media = $resultado['media_temperatura_interna'] ?? null;
     <button type="submit">Calcular Média</button>
   </form>
 
+<!--mostra resultado-->
   <?php if ($media !== null): ?>
     <div class="resultado">
       <strong>Período:</strong> <?php echo htmlspecialchars($data_inicial); ?> a <?php echo htmlspecialchars($data_final); ?><br>
