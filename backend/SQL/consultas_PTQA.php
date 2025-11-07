@@ -26,7 +26,7 @@
 
 <div style="padding:40px">
 
-<h2>1) Data, hora e temperatura</h2>
+<h2> Data, hora e temperatura</h2>
 <table border="1">
 <tr><th>Data/Hora</th><th>Temperatura</th></tr>
 <?php
