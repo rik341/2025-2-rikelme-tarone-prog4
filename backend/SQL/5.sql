@@ -1,4 +1,0 @@
-SELECT *
-FROM leituraptqa
-WHERE pressao < 1000
-  AND datahora BETWEEN '2025-06-01' AND '2025-06-10';
