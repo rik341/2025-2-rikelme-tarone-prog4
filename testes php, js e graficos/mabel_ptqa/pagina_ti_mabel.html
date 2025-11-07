@@ -5,8 +5,13 @@
   <title>Temperaturas Interna e Externa - Projeto MABEL</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="/frontend/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+ 
+ 
+
 </head>
-<body>
+<>
 
  
   <nav class="navbar">
@@ -32,15 +37,19 @@
 
     <div id="status" class="loading"></div>
 
-    <h3>Temperatura Interna</h3>
-    <canvas id="grafico_ti"></canvas>
+    <div>  
+      <h3>Temperatura Interna</h3>
+      <canvas id="myChart"></canvas>
+    </div>
 
     <h3>Temperatura Externa</h3>
     <canvas id="grafico_te"></canvas>
+    
   </section>
 
-  <script src="js/grafico_ti_mabel.js"></script>
+  <script src="js/grafico.js"></script>
   <script src="js/grafico_te_mabel.js"></script>
+  
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('form-filtro');
