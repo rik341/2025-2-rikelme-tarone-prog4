@@ -21,6 +21,12 @@ $sql = "SELECT
 $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode($resultado);
+  exit;
+}
 ?>
 
 <!DOCTYPE html>

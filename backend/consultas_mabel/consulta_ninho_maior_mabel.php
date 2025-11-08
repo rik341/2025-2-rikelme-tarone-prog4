@@ -1,13 +1,13 @@
 <?php
 include 'conecta_mysql.php';
 
-// Define o período (com valores padrão)
+// Define o período padrão (pode ser alterado no formulário)
 $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
 
-// Consulta SQL — calcula a média da umidade interna no intervalo
+// Consulta SQL — obtém o valor máximo da temperatura interna no intervalo
 $sql = "SELECT 
-          ROUND(AVG(hi), 2) AS media_umidade_interna
+          MAX(ninho) AS temperatura_maxima
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim";
 
@@ -15,30 +15,37 @@ $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$media = $resultado['media_umidade_interna'] ?? null;
+$maxima = $resultado['temperatura_maxima'] ?? null;
+
+if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode($resultado);
+  exit;
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Média da umidade interna da Colmeia - MABEL</title>
+  <title>Temperatura Máxima do Ninho - MABEL</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 40px; background-color: #fafafa; }
     form { margin-bottom: 20px; }
     label { margin-right: 10px; }
     input[type="date"] { margin-right: 10px; }
     .resultado {
-      background-color: #eef;
+      background-color: #ffe;
       padding: 20px;
       border-radius: 8px;
       display: inline-block;
       margin-top: 10px;
+      border: 1px solid #ccc;
     }
   </style>
 </head>
 <body>
-  <h2>Média da umidade interna da Colmeia (Campo: <code>hi</code>)</h2>
+  <h2>Temperatura Máxima do Ninho (Campo: <code>ninho</code>)</h2>
 
   <!-- Filtro de período -->
   <form method="get">
@@ -46,16 +53,16 @@ $media = $resultado['media_umidade_interna'] ?? null;
     <input type="date" name="inicio" value="<?php echo htmlspecialchars($data_inicial); ?>">
     <label>Data final:</label>
     <input type="date" name="fim" value="<?php echo htmlspecialchars($data_final); ?>">
-    <button type="submit">Calcular Média</button>
+    <button type="submit">Consultar</button>
   </form>
 
-  <?php if ($media !== null): ?>
+  <?php if ($maxima !== null): ?>
     <div class="resultado">
       <strong>Período:</strong> <?php echo htmlspecialchars($data_inicial); ?> a <?php echo htmlspecialchars($data_final); ?><br>
-      <strong>Umidade interna Média:</strong> <?php echo htmlspecialchars($media); ?> °C
+      <strong>Temperatura Máxima do Ninho:</strong> <?php echo htmlspecialchars($maxima); ?> °C
     </div>
   <?php else: ?>
-    <p>Nenhum dado encontrado para o período selecionado.</p>
+    <p>Nenhum registro encontrado para o período selecionado.</p>
   <?php endif; ?>
 </body>
 </html>
