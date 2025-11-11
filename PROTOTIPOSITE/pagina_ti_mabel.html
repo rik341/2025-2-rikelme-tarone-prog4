@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Temperaturas Interna e Externa - Projeto MABEL</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/2025-2-enzo-brancher-prog4/frontend/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">
+      <a href="index.html"><img src="imagens/download.jpg" alt="Logo ifsc"></a>
+    </div>
+    <ul>
+      <li><a href="index.html">Voltar</a></li>
+    </ul>
+  </nav>
+
+  <section class="grafico-section">
+    <h1>Temperaturas Internas e Externas Registradas</h1>
+
+    <form id="form-filtro">
+      <label>Data inicial:</label>
+      <input type="date" id="inicio" value="2025-06-01">
+      <label>Data final:</label>
+      <input type="date" id="fim" value="2025-06-30">
+      <button type="submit">Filtrar</button>
+    </form>
+
+    <div id="status" class="loading"></div>
+
+    <h3>Temperatura Interna</h3>
+    <canvas id="grafico_ti"></canvas>
+
+    <h3>Temperatura Externa</h3>
+    <canvas id="grafico_te"></canvas>
+  </section>
+
+  <script src="js/grafico_ti_mabel.js"></script>
+  <script src="js/grafico_te_mabel.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('form-filtro');
+      const status = document.getElementById('status');
+
+      async function atualizarGraficos(inicio, fim) {
+        status.textContent = "Carregando dados...";
+        if (typeof carregarTI === "function") await carregarTI(inicio, fim);
+        if (typeof carregarTE === "function") await carregarTE(inicio, fim);
+        status.textContent = "";
+      }
+
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        const inicio = document.getElementById('inicio').value;
+        const fim = document.getElementById('fim').value;
+        atualizarGraficos(inicio, fim);
+      });
+
+      atualizarGraficos('2025-06-01', '2025-06-30');
+    });
+  </script>
+</body>
+</html>
