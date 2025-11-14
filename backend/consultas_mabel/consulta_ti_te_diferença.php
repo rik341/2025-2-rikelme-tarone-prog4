@@ -7,7 +7,7 @@ $data_final   = $_GET['fim'] ?? '2025-06-30';
 
 // Consulta SQL — calcula a diferença média entre te e ti
 $sql = "SELECT 
-          AVG(te - ti) AS media_diferenca
+          AVG(ABS(te - ti)) AS media_diferenca
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim;";
 
