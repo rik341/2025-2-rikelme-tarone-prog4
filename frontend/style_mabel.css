@@ -64,8 +64,8 @@ body {
     left: 0;
     width: 200px;
     height: calc(100vh - 65px); /* altura ajustada para evitar que sobreponha a navbar */
-    background-color: #f1f1f1;
-    color: #1ea44e;
+    background: linear-gradient(90deg, #1ea44e, #15913e);
+    color: #ffffff;
     padding-top: 20px;
     z-index: 4;
 }
@@ -78,7 +78,7 @@ body {
     padding: 10px 15px;
     text-decoration: none;
     font-size: 18px;
-    color: #1ea44e;
+    color: white;
     display: block;
     transition: 0.3s;
 }
