@@ -1,40 +1,58 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Temperaturas Interna e Externa - Projeto MABEL</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="style_mabel.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperatura Interna - MABEL</title>
+    
+    <link rel="stylesheet" href="style_mabel.css">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="script.js"></script>
 </head>
+
 <body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">IFSC <span>Chapecó</span></div>
+            <ul class="nav-links">
+                <li><a href="index.html">Início</a></li>
+                <li><a href="#">Sobre</a></li>
+                <li><a href="#">Projetos</a></li>
+            </ul>
+        </nav>
+    </header>   
 
-  <nav class="navbar">
-    <div class="logo">
-      <a href="index.html"><img src="imagens/download.jpg" alt="Logo ifsc"></a>
+    <div class="sidebar">
+        <h2>Menu</h2>
+        <a href="mabel_ti.html">Temperatura Interna</a>
+        <a href="mabel_te.html">Temperatura Externa</a>
+        <a href="mabel_hi.html">Umidade Interna</a>
+        <a href="mabel_he.html">Umidade Externa</a>
     </div>
-    <ul>
-      <li><a href="index.html">Voltar</a></li>
-    </ul>
-  </nav>
 
-
-  
-  <section class="grafico-interna">
-    <h1>Temperaturas Internas e Externas Registradas</h1>
-
-    <form id="form-filtro">
-      <label>Data inicial:</label>
-      <input type="date" id="inicio" value="2025-06-01">
-      <label>Data final:</label>
-      <input type="date" id="fim" value="2025-06-30">
-      <button type="submit">Filtrar</button>
-    </form>
-
-    <div id="status" class="loading"></div>
-
-    <h3>Temperatura Interna</h3>
-    <canvas id="grafico_ti"></canvas>
-  </section>
+    <main class="content">
+        
+        <form id="formPeriodo">
+            <label>Início: <input type="date" id="inicio"></label>
+            <label>Fim: <input type="date" id="fim"></label>
+            <button type="submit">Gerar Gráfico</button>
+        </form>
+        
+        <div id="mediaContainer" class="media-box">
+            <strong>Média da Temperatura Interna:</strong> <span id="valorMedia">--</span> °C
+        </div>
+        
+        <div>
+            <strong>Diferença média (TI − TE):</strong>
+            <span id="valorMediaDif">--</span> °C
+        </div>
+        
+        <h2>Gráfico da Temperatura Interna</h2>
+        <canvas id="graficoTemperatura"></canvas>
+        
+    </main>
 </body>
 </html>
