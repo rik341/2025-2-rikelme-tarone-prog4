@@ -120,7 +120,7 @@ chart = new Chart(ctx, {
   // ============================================================
   // 5) DEFINIR DATA PADRÃO FIXA (01 a 07 de junho de 2025)
   // ============================================================
-  document.getElementById("inicio").value = "2025-06-01";
+  do cument.getElementById("inicio").value = "2025-06-01";
   document.getElementById("fim").value = "2025-06-07";
 
   // Carregar inicial automaticamente
