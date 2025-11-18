@@ -1,11 +1,13 @@
 /* Reset e Layout geral */
+
+
 body {
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow-y: auto;
+    height: auto;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #ffffff;
-    height: 100vh;
 }
 
 /* NAVBAR SUPERIOR */
@@ -93,5 +95,7 @@ body {
     margin-left: 200px;
     margin-top: 65px; /* evita sobrepor o conteúdo à navbar */
     padding: 40px;
-    height: calc(100vh - 65px);
+    min-height: calc(100vh - 65px);
+    overflow-y: visible;
+
 }
