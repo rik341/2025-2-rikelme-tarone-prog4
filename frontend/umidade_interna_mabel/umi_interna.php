@@ -8,50 +8,41 @@ $data_final   = $_GET['fim'] ?? '2025-06-30';
 // Consulta SQL — junta data e hora reais da inclusão
 $sql = "SELECT 
           CONCAT(datainclusao, ' ', horainclusao) AS datahora_completa,
-          te
+          hi
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim
         ORDER BY datainclusao, horainclusao ASC";
 
 $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
-$grafico = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
-// Consulta SQL — calcula a média da temperatura externa no intervalo
+
+// Consulta SQL — calcula a média da umidade interna no intervalo
 $sql = "SELECT 
-          ROUND(AVG(te), 2) AS media_temperatura_externa
+          ROUND(AVG(hi), 2) AS media_umidade_interna
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim";
 
 $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
-$media = $stmt->fetch(PDO::FETCH_ASSOC);
+$resultadomedia = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Consulta SQL — calcula a diferença média entre te e ti
-$sql = "SELECT 
-          AVG(ABS(te - ti)) AS media_diferenca
-        FROM leituramabel
-        WHERE datainclusao BETWEEN :inicio AND :fim;";
-
-$stmt = $conecta->prepare($sql);
-$stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
-$dif = $stmt->fetch(PDO::FETCH_ASSOC);
-
+$media = $resultadomedia['media_umidade_interna'] ?? null;
 
 if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
-// 4) Agora SIM devolve tudo junto
   header("Content-Type: application/json; charset=utf-8");
+
   echo json_encode([
-      "dados"      => $grafico,
-      "media"      => $media['media_temperatura_externa'],
-      "diferenca"  => $dif['media_diferenca']
+      "dados" => $resultado,
+      "media" => $media
   ]);
+
   exit;
 }
 
 ?>
-
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -72,7 +63,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
         <nav class="navbar">
             <div class="logo">IFSC <span>Chapecó</span></div>
             <ul class="nav-links">
-                <li><a href="/frontend/index.html">Início</a></li>
+                <li><a href="index.html">Início</a></li>
             </ul>
         </nav>
     </header>   
@@ -90,22 +81,18 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
         <form id="formPeriodo">
             <label>Início: <input type="date" id="inicio"></label>
             <label>Fim: <input type="date" id="fim"></label>
-            <button type="submit">Gerar Gráfico</button>
+            <button type="submit">filtrar</button>
         </form>
         
         <div id="mediaContainer" class="media-box">
-            <strong>Média da Temperatura Externa:</strong> <span id="valorMedia">--</span> °C
+            <strong>Média da Temperatura Externa:</strong> <span id="MediaUmidade">--</span> °C
         </div>
-        
-        <div>
-            <strong>Diferença média (TI − TE):</strong>
-            <span id="valorMediaDif">--</span> °C
-        </div>
-        
+
         <h2>Gráfico da Temperatura Externa</h2>
-        <canvas id="graficoTemperatura"></canvas>
+        <canvas id="graficoUmidadeInterna"></canvas>
         
     </main>
 </body>
 </html>
+
 
