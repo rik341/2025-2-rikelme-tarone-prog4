@@ -164,10 +164,13 @@ body {
     font-weight: bold;
     color: #222;
   }
+/* ... (Seções anteriores como body, navbar, hero, projetos, devs permanecem iguais) ... */
+
+/* Estilização da Seção de Gráfico */
 .grafico-section {
   background-color: #f9f9f9;
   padding: 80px 60px;
-  text-align: center;
+  text-align: center; /* <--- ADICIONADO: Centraliza texto e elementos inline */
 }
 
 .grafico-section h1 {
@@ -178,10 +181,11 @@ body {
 
 form {
   display: flex;
-  justify-content: center;
+  justify-content: center; /* JÁ EXISTE: Centraliza os itens do formulário (input/botão) */
   align-items: center;
   gap: 10px;
-  margin-bottom: 30px;
+  margin: 0 auto 30px; /* ADICIONADO: Centraliza o formulário como um bloco (se for usado fora de um flexbox pai) */
+  max-width: 600px; /* ADICIONADO: Dá uma largura máxima para a centralização do bloco funcionar */
 }
 
 form label {
@@ -213,7 +217,7 @@ canvas {
   max-width: 900px;
   width: 100%;
   height: 400px;
-  margin: 40px auto;
+  margin: 40px auto; /* JÁ EXISTE: Centraliza o canvas (elemento de bloco) */
   display: block;
   background: white;
   border-radius: 10px;
