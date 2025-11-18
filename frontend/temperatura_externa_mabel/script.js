@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const resposta = await fetch(`${URL}?formato=json&inicio=${inicio}&fim=${fim}`);
       const dados = await resposta.json();
+      console.log (dados)
 
       // === DADOS DO GRÁFICO ===
       const labels = dados.dados.map(item => item.datahora_completa);

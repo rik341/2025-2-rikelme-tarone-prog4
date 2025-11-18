@@ -92,7 +92,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script defer src="script.js"></script>
+    <script defer src="./script.js"></script>
 </head>
 
 <body>
