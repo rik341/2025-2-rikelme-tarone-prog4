@@ -344,21 +344,4 @@ canvas {
 
 .dev img {
   width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  border: 3px solid #1b4d25;
-  object-fit: cover;
-  margin-bottom: 10px;
-}
-
-.dev p {
-  font-weight: bold;
-  color: #222;
-}
-
-.loading {
-  font-size: 18px;
-  color: #1b4d25;
-  margin-bottom: 20px;
-  text-align: center;
-}
+  height:}
