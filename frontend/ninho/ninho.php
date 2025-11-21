@@ -1,51 +1,65 @@
 <?php
 include 'conecta_mysql.php';
 
+// Período com valores padrão
 $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
 
+/* ===========================================================
+   1) BUSCA REGISTROS COMPLETOS
+   =========================================================== */
 $sql = "SELECT 
           CONCAT(datainclusao, ' ', horainclusao) AS datahora_completa,
-          te
+          ninho
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim
         ORDER BY datainclusao, horainclusao ASC";
 
 $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
-$grafico = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$resultados_registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-$sql = "SELECT 
-          ROUND(AVG(te), 2) AS media_temperatura_externa
+/* ===========================================================
+   2) BUSCA MÁXIMA
+   =========================================================== */
+$sql = "SELECT MAX(ninho) AS temperatura_maxima
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim";
 
 $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
-$media = $stmt->fetch(PDO::FETCH_ASSOC);
+$linhaMax = $stmt->fetch(PDO::FETCH_ASSOC);
+$temperatura_maxima = $linhaMax['temperatura_maxima'] ?? null;
 
-$sql = "SELECT 
-          AVG(ABS(te - ti)) AS media_diferenca
+/* ===========================================================
+   3) BUSCA MÍNIMA
+   =========================================================== */
+$sql = "SELECT MIN(ninho) AS temperatura_minima
         FROM leituramabel
-        WHERE datainclusao BETWEEN :inicio AND :fim;";
+        WHERE datainclusao BETWEEN :inicio AND :fim";
 
 $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
-$dif = $stmt->fetch(PDO::FETCH_ASSOC);
+$linhaMin = $stmt->fetch(PDO::FETCH_ASSOC);
+$temperatura_minima = $linhaMin['temperatura_minima'] ?? null;
 
-
+/* ===========================================================
+   4) SE PEDIR JSON, RETORNA E SAI
+   =========================================================== */
 if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
-  header("Content-Type: application/json; charset=utf-8");
-  echo json_encode([
-      "dados"      => $grafico,
-      "media"      => $media['media_temperatura_externa'],
-      "diferenca"  => $dif['media_diferenca']
-  ]);
-  exit;
+    header("Content-Type: application/json; charset=utf-8");
+    echo json_encode([
+        "status"    => "ok",
+        "inicio"    => $data_inicial,
+        "fim"       => $data_final,
+        "registros" => $resultados_registros,
+        "maximo"    => $temperatura_maxima,
+        "minimo"    => $temperatura_minima
+    ]);
+    exit;
 }
-
 ?>
+
 
 
 <!DOCTYPE html>
@@ -53,10 +67,9 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temperatura Externa - MABEL</title>
+    <title>Ninho - MABEL</title>
     
-    <link rel="stylesheet" href="../../frontend/style.css">
-    
+    <link rel="stylesheet" href="../../frontend/style_mabel.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="./script.js"></script>
@@ -90,14 +103,16 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
         </form>
         
         <div id="mediaContainer" class="media-box">
-            <strong>Média da Temperatura Externa:</strong> <span id="valorMedia">--</span> °C
-        </div>
-        <div id="mediaContainer" class="media-box">
-            <strong>Diferença média (TI − TE):</strong>
-            <span id="valorMediaDif">--</span> °C
+            <strong>temperatura miníma do ninho</strong> 
+            <span id="valormax">--</span> °C
         </div>
         
-        <h2>Gráfico da Temperatura Externa</h2>
+        <div>
+            <strong>temperatura miníma do ninho</strong>
+            <span id="valormin">--</span> °C
+        </div>
+        
+        <h2>Gráfico da temperatura do ninho</h2>
         <canvas id="graficoTemperatura"></canvas>
         
     </main>
