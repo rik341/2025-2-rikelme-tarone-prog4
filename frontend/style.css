@@ -1,16 +1,10 @@
-/*
- * ============================================================
- * 1. BASE: RESET, FONTES E CORES GLOBAIS
- * ============================================================
- */
- :root {
-  /* Cores do Projeto */
-  --cor-primaria: #0c3e1e;       /* Verde Escuro (Sidebar, Títulos) */
-  --cor-secundaria: #1ea44e;     /* Verde Claro (Destaque, Botões) */
-  --cor-fundo: #f5f5f5;          /* Fundo da Página */
-  --cor-box: #e6f3e9;            /* Fundo de caixas de destaque */
-  --cor-texto-claro: #f1f1f1;    /* Texto em fundos escuros */
-  --cor-sombra: rgba(0,0,0,0.1); /* Sombra Padrão */
+:root {
+  --cor-primaria: #0c3e1e;
+  --cor-secundaria: #1ea44e;
+  --cor-fundo: #f5f5f5;
+  --cor-box: #e6f3e9;
+  --cor-texto-claro: #f1f1f1;
+  --cor-sombra: rgba(0,0,0,0.1);
 }
 
 body {
@@ -18,16 +12,10 @@ body {
   font-family: 'Arial', sans-serif;
   background-color: var(--cor-fundo);
   color: #222;
-  /* Espaçamento superior para a navbar fixa em TODAS as páginas */
   padding-top: 90px; 
 }
 
 
-/*
-* ============================================================
-* 2. NAVBAR (PADRÃO FIXO)
-* ============================================================
-*/
 .navbar {
   display: flex;
   align-items: center;
@@ -35,7 +23,7 @@ body {
   padding: 10px 60px;
   background-color: white;
   box-shadow: 0 2px 10px var(--cor-sombra);
-  position: fixed; /* Essencial para o padrão fixo */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -46,7 +34,6 @@ body {
 .logo img {
   height: 70px;
 }
-/* Estilo para "IFSC Chapecó" quando não é uma imagem de logo */
 .logo {
   color: var(--cor-primaria);
   font-size: 24px;
@@ -78,18 +65,13 @@ body {
 }
 
 
-/*
-* ============================================================
-* 3. LAYOUT COM SIDEBAR (PÁGINAS MABEL)
-* ============================================================
-*/
 .sidebar {
   width: 250px;
-  background-color: var(--cor-primaria); /* Cor escura mantida */
+  background-color: var(--cor-primaria);
   color: white;
   padding: 20px 0;
   min-height: 100vh;
-  position: fixed; /* Fixa a sidebar */
+  position: fixed;
   top: 0; 
   left: 0;
   z-index: 999;
@@ -97,10 +79,10 @@ body {
 
 .sidebar h2 {
   text-align: center;
-  color: var(--cor-secundaria); /* Cor de destaque mantida */
+  color: var(--cor-secundaria);
   margin-bottom: 20px;
   padding: 0 15px;
-  padding-top: 80px; /* Espaçamento abaixo da navbar fixa */
+  padding-top: 80px;
 }
 
 .sidebar a {
@@ -115,49 +97,48 @@ body {
 
 .sidebar a:hover,
 .sidebar a.active {
-  background-color: #1d6b2f; /* Um tom um pouco mais claro do verde escuro */
+  background-color: #1d6b2f;
   color: white;
   border-left: 5px solid var(--cor-secundaria); 
 }
 
 .content {
-  margin-left: 250px; /* Cria espaço para a sidebar fixa */
+  margin-left: 250px;
   padding: 20px 30px 30px 30px; 
   flex-grow: 1;
   max-width: calc(100% - 250px);
 }
 
 
-/*
-* ============================================================
-* 4. ESTILOS DE FORMULÁRIO E COMPONENTES
-* ============================================================
-*/
-
-/* Estilos de Formulário - GERAL (para páginas PTQA e o form da homepage) */
-body > form, /* Form sem sidebar (PTQA, temperature.php, etc.) */
-.grafico-section form { /* Form dentro da seção de gráfico */
+body > form,
+.grafico-section form {
   display: flex;
-  justify-content: center; /* Centraliza no centro da página */
+  justify-content: center;
   align-items: center;
   gap: 15px;
   padding: 20px;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px var(--cor-sombra);
-  margin: 0 auto 30px; /* Centralização do bloco */
+  margin: 0 auto 30px;
   max-width: 800px;
 }
 
-/* Estilos de Formulário - SIDEBAR (para páginas MABEL) */
 .content #formPeriodo {
-  justify-content: flex-start; /* Alinha à esquerda dentro da área .content */
+  justify-content: flex-start;
   margin-left: 0;
   margin-right: 0;
   max-width: none;
+  display: flex;
+  gap: 15px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--cor-sombra);
+  margin-bottom: 30px;
 }
 
-/* Estilos de Input e Label */
+
 form label {
   font-weight: 600;
   color: #1b4d25;
@@ -182,7 +163,6 @@ form select:focus {
   outline: none;
 }
 
-/* Botão de Ação (Gerar Gráfico / Filtrar) */
 form button[type="submit"] {
   padding: 8px 18px;
   background-color: var(--cor-secundaria); 
@@ -204,7 +184,6 @@ form button[type="submit"]:active {
 }
 
 
-/* Blocos de Média (TI, TE e Diferença) */
 .media-box,
 .content > div:nth-child(4) { 
   display: inline-block;
@@ -231,7 +210,6 @@ form button[type="submit"]:active {
 }
 
 
-/* Títulos e Gráficos */
 .content h1,
 .content h2,
 .grafico-section h1,
@@ -248,25 +226,19 @@ canvas {
   max-width: 100%;
   width: 100%;
   height: 400px;
-  margin: 40px auto; /* Centraliza o bloco do gráfico */
+  margin: 40px auto;
   display: block;
   background: white;
   border-radius: 10px;
   box-shadow: 0 3px 12px var(--cor-sombra);
 }
 
-/*
-* ============================================================
-* 5. ESTILOS DE HOMEPAGE (index.html)
-* ============================================================
-*/
-
 .hero {
   position: relative;
   width: 100%;
   height: 500px;
   overflow: hidden;
-  margin-top: -90px; /* Compensa o padding-top do body para a imagem ocupar o topo */
+  margin-top: -90px;
 }
 
 .hero-img {

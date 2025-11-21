@@ -92,8 +92,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
         <div id="mediaContainer" class="media-box">
             <strong>Média da Temperatura Externa:</strong> <span id="valorMedia">--</span> °C
         </div>
-        
-        <div>
+        <div id="mediaContainer" class="media-box">
             <strong>Diferença média (TI − TE):</strong>
             <span id="valorMediaDif">--</span> °C
         </div>

@@ -27,6 +27,7 @@ $sql = "SELECT ROUND(AVG(ti), 2) AS media_temperatura_interna
 $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $media = $stmt->fetch(PDO::FETCH_ASSOC);
+$media_ti_inicial = $media['media_temperatura_interna']; // Valor para HTML
 
 $sql = "SELECT 
           datainclusao,
@@ -40,13 +41,14 @@ $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $mediadiaria = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$sql = "SELECT AVG(ABS(te - ti)) AS media_diferenca
+$sql = "SELECT ROUND(AVG(ABS(te - ti)), 2) AS media_diferenca
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim";
 
 $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $dif = $stmt->fetch(PDO::FETCH_ASSOC);
+$media_dif_inicial = $dif['media_diferenca']; // Valor para HTML
 
 if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 
@@ -55,9 +57,9 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 
     echo json_encode([
         "registros_ti"  => $ti,
-        "media_ti"      => $media['media_temperatura_interna'],
+        "media_ti"      => $media_ti_inicial,
         "media_diaria"  => $mediadiaria,
-        "diferenca"     => $dif['media_diferenca']
+        "diferenca"     => $media_dif_inicial
     ], JSON_UNESCAPED_UNICODE);
 
     exit;
@@ -99,20 +101,18 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     </div>
      <main class="content">
 
-
         <form id="formPeriodo">
-            <label>Início: <input type="date" id="inicio"></label>
-            <label>Fim: <input type="date" id="fim"></label>
+            <label>Início: <input type="date" id="inicio" value="<?= htmlspecialchars($data_inicial) ?>"></label>
+            <label>Fim: <input type="date" id="fim" value="<?= htmlspecialchars($data_final) ?>"></label>
             <button type="submit">Gerar Gráfico</button>
         </form>
-
-        <div id="mediaContainer" class="media-box">
-            <strong>Média da Temperatura Interna:</strong> <span id="valorMedia">--</span> °C
-        </div>
         
-        <div>
-            <strong>Diferença média (TI − TE):</strong>
-            <span id="valorMediaDif">--</span> °C
+        <div id="mediaContainerTI" class="media-box">
+            <strong>Média da Temperatura Interna:</strong> <span id="valorMedia"><?= $media_ti_inicial ?? '--' ?></span> °C
+        </div>
+        <div id="mediaContainerDif" class="media-box">
+             <strong>Diferença média (TI − TE):</strong>
+            <span id="valorMediaDif"><?= $media_dif_inicial ?? '--' ?></span> °C
         </div>
         
         <h2>Gráfico da Temperatura Interna</h2>
