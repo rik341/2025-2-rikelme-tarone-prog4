@@ -63,17 +63,18 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
         <nav class="navbar">
             <div class="logo">IFSC <span>Chapecó</span></div>
             <ul class="nav-links">
-                <li><a href="index.html">Início</a></li>
+                <li><a href="../index.html">Início</a></li>
             </ul>
         </nav>
     </header>   
 
     <div class="sidebar">
         <h2>Menu</h2>
-        <a href="mabel_ti.html">Temperatura Interna</a>
-        <a href="mabel_te.html">Temperatura Externa</a>
-        <a href="mabel_hi.html">Umidade Interna</a>
-        <a href="mabel_he.html">Umidade Externa</a>
+        <a href="../temperatura_interna_mabel/temp_interna.php">Temperatura Interna</a>
+        <a href="../temperatura_externa_mabel/temp_externa.php">Temperatura Externa</a>
+        <a href="../umidade_interna_mabel/umi_interna.php">Umidade Interna</a>
+        <a href="../umidade_externa_mabel/umi_externa.php">Umidade Externa</a>
+        <a href="../ninho/ninho.php">Temperatura do Ninho</a>
     </div>
 
     <main class="content">
