@@ -1,93 +1,115 @@
 document.addEventListener("DOMContentLoaded", async () => {
 
     const url = `temperature.php?formato=json&inicio=${dataInicial}&fim=${dataFinal}`;
-    const resp = await fetch(url);
-    const dados = await resp.json();
+    const loading = document.getElementById("loading");
 
-    const lista = dados.lista;
-    const media = dados.media_periodo.temperatura_media;
-    const maxmin = dados.max_min_med;
+    /* =============================
+       1) BUSCAR DADOS DO PHP
+       ============================= */
+    let resp;
+    try {
+        resp = await fetch(url);
 
-    // ------------------------------------------------------
-    // 1) GRÁFICO DATA/HORA/TEMPERATURA - filtrando de 20 em 20
-    // ------------------------------------------------------
-    const filtroIntervalo = 20; // mostra 1 a cada 20 leituras
-    const tempoLabels = lista
-        .filter((_, index) => index % filtroIntervalo === 0)
-        .map(l => `${l.data} ${l.hora}`);
-    const tempValores = lista
-        .filter((_, index) => index % filtroIntervalo === 0)
-        .map(l => Number(l.temperatura));
-
-    const ctx = document.getElementById("graficoTemperatura").getContext("2d");
-
-    // Gradiente para a linha
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(255, 99, 132, 0.5)');
-    gradient.addColorStop(1, 'rgba(255, 99, 132, 0)');
-
-    new Chart(ctx, {
-        type: "line",
-        data: {
-            labels: tempoLabels,
-            datasets: [{
-                label: "Temperatura (°C)",
-                data: tempValores,
-                borderColor: "rgba(255, 99, 132, 1)",
-                backgroundColor: gradient,
-                borderWidth: 2,
-                pointRadius: 3,
-                pointHoverRadius: 6,
-                pointBackgroundColor: "red",
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: true },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    backgroundColor: 'rgba(0,0,0,0.8)'
-                },
-            },
-            interaction: { mode: 'nearest', axis: 'x', intersect: false },
-            scales: {
-                x: {
-                    display: true,
-                    title: { display: true, text: 'Data / Hora' },
-                    ticks: { maxRotation: 90, minRotation: 45, autoSkip: true }
-                },
-                y: { display: true, title: { display: true, text: 'Temperatura (°C)' } }
-            }
+        if (!resp.ok) {
+            loading.textContent = "Erro ao buscar dados do servidor.";
+            return;
         }
-    });
+    } catch (e) {
+        loading.textContent = "Erro de conexão com o servidor.";
+        return;
+    }
 
-    // ------------------------------------------------------
-    // MOSTRAR TEMPERATURA MÉDIA COMO TEXTO
-    // ------------------------------------------------------
-    document.getElementById("valorMedia").textContent = `${Number(media).toFixed(2)} °C`;
+    const dados = await resp.json();
+    loading.style.display = "none";
 
-    // ------------------------------------------------------
-    // 2) GRÁFICO MAX / MIN / MED
-    // ------------------------------------------------------
-    new Chart(document.getElementById("graficoMaxMinMed"), {
-        type: "bar",
-        data: {
-            labels: ["Máx", "Mín", "Média"],
-            datasets: [{
-                label: "°C",
-                data: [
-                    Number(maxmin.temp_maxima),
-                    Number(maxmin.temp_minima),
-                    Number(maxmin.temp_media)
-                ],
-                backgroundColor: ["red", "blue", "orange"]
-            }]
-        },
-        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false } } }
-    });
+    /* =============================
+       2) GRÁFICO DE TEMPERATURA
+       ============================= */
+    if (dados.lista.length === 0) {
+        document.getElementById("graficoTemperatura").outerHTML =
+            "<p>Nenhum dado de temperatura encontrado no período.</p>";
+    } else {
+        const labelsTemp = dados.lista.map(t => `${t.data} ${t.hora}`);
+        const valoresTemp = dados.lista.map(t => Number(t.temperatura));
+
+        new Chart(document.getElementById("graficoTemperatura"), {
+            type: "line",
+            data: {
+                labels: labelsTemp,
+                datasets: [{
+                    label: "Temperatura (°C)",
+                    data: valoresTemp,
+                    borderColor: "orange",
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: false } }
+            }
+        });
+    }
+
+    /* =============================
+       3) TEMPERATURA MÉDIA
+       ============================= */
+    const media = dados.media_periodo?.temperatura_media;
+    document.getElementById("valorMedia").textContent =
+        media ? `${Number(media).toFixed(2)} °C` : "Sem dados no período";
+
+    /* =============================
+       4) GRÁFICO MÁX / MIN / MÉD
+       ============================= */
+    if (dados.max_min_med) {
+        new Chart(document.getElementById("graficoMaxMinMed"), {
+            type: "bar",
+            data: {
+                labels: ["Máxima", "Mínima", "Média"],
+                datasets: [{
+                    label: "Temperatura (°C)",
+                    data: [
+                        dados.max_min_med.temp_maxima,
+                        dados.max_min_med.temp_minima,
+                        Number(dados.max_min_med.temp_media).toFixed(2)
+                    ],
+                    backgroundColor: ["red", "blue", "green"]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: false } }
+            }
+        });
+    }
+
+    /* =============================
+       5) GRÁFICO UMIDADE > 70%
+       ============================= */
+    if (dados.umidade_alta.length === 0) {
+        document.getElementById("graficoUmidade").outerHTML =
+            "<p>Nenhum registro de umidade acima de 70%.</p>";
+    } else {
+        const labelsUmidade = dados.umidade_alta.map(u => `${u.data} ${u.hora}`);
+        const valoresUmidade = dados.umidade_alta.map(u => Number(u.umidade));
+
+        new Chart(document.getElementById("graficoUmidade"), {
+            type: "bar",
+            data: {
+                labels: labelsUmidade,
+                datasets: [{
+                    label: "Umidade (%)",
+                    data: valoresUmidade,
+                    backgroundColor: "rgba(54,162,235,0.7)",
+                    borderColor: "blue",
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
 
 });

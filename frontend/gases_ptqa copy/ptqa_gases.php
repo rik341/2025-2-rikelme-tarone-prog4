@@ -49,6 +49,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 <head>
     <meta charset="UTF-8">
     <title>Gráfico TVOC</title>
+    <link rel="stylesheet" href="../../frontend/style_mabel.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -64,8 +65,27 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
             height: 400px;
         }
     </style>
+
 </head>
 <body>
+    
+    <header>
+        <nav class="navbar">
+            <div class="logo">IFSC <span>Chapecó</span></div>
+            <ul class="nav-links">
+                <li><a href="../index.html">Início</a></li>
+            </ul>
+        </nav>
+    </header>   
+
+    <div class="sidebar">
+        <h2>Menu</h2>
+            <a href="../aqi_ptqa/ptqa_aqi.php">Qualidade do ar</a>
+            <a href="../co2_ptqa/co2.php">Emissões de CO2</a>
+            <a href="../gases_ptqa/ptqa_gases.php">Gases Voláteis</a>
+            <a href="../pressao_ptqa/pressao_ptqa.php">Pressão atmosférica</a>
+            <a href="../temperatura_ptqa/temperature.php">Temperatura e umidade</a>
+    </div>
 
     <!-- Seção do gráfico -->
     <section class="grafico-section">

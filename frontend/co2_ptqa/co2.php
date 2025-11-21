@@ -6,72 +6,60 @@ $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
 
 /* =====================================================
-   1) DATA, HORA E TEMPERATURA – ORDEM CRESCENTE
+   1) CO2 > 1000 ppm NO PERÍODO
    ===================================================== */
 $sql1 = "SELECT 
             dataleitura AS data,
             horaleitura AS hora,
-            temperatura
+            eco2
          FROM leituraptqa
          WHERE dataleitura BETWEEN :inicio AND :fim
+           AND eco2 > 1000
          ORDER BY dataleitura ASC, horaleitura ASC";
 
 $stmt1 = $conecta->prepare($sql1);
 $stmt1->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
-$lista_temperaturas = $stmt1->fetchAll(PDO::FETCH_ASSOC);
+$co2_acima_1000 = $stmt1->fetchAll(PDO::FETCH_ASSOC);
 
 /* =====================================================
-   2) TEMPERATURA MÉDIA
+   2) CO2 MÁXIMO NO PERÍODO
    ===================================================== */
-$sql2 = "SELECT AVG(temperatura) AS temperatura_media
+$sql2 = "SELECT MAX(eco2) AS co2_maximo
          FROM leituraptqa
          WHERE dataleitura BETWEEN :inicio AND :fim";
 
 $stmt2 = $conecta->prepare($sql2);
 $stmt2->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
-$media_resultado = $stmt2->fetch(PDO::FETCH_ASSOC);
+$co2_maximo_periodo = $stmt2->fetch(PDO::FETCH_ASSOC);
 
 /* =====================================================
-   3) TEMPERATURA MÁXIMA, MÍNIMA E MÉDIA
+   3) TOP 5 DIAS DO MÊS COM MAIOR MÉDIA DE CO2
    ===================================================== */
+$mes = substr($data_inicial, 0, 7); // Ex.: "2025-06"
+
 $sql3 = "SELECT 
-            MAX(temperatura) AS temp_maxima,
-            MIN(temperatura) AS temp_minima,
-            AVG(temperatura) AS temp_media
+            dataleitura AS dia,
+            AVG(eco2) AS media_co2
          FROM leituraptqa
-         WHERE dataleitura BETWEEN :inicio AND :fim";
+         WHERE dataleitura LIKE :mesFiltro
+         GROUP BY dataleitura
+         ORDER BY media_co2 DESC
+         LIMIT 5";
 
 $stmt3 = $conecta->prepare($sql3);
-$stmt3->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
-$max_min_med = $stmt3->fetch(PDO::FETCH_ASSOC);
+$stmt3->execute([':mesFiltro' => "$mes%"]);
+$top5_medias_co2 = $stmt3->fetchAll(PDO::FETCH_ASSOC);
 
 /* =====================================================
-   4) UMIDADE > 70% – ORDEM DECRESCENTE
-   ===================================================== */
-$sql4 = "SELECT 
-            dataleitura AS data,
-            horaleitura AS hora,
-            umidade
-         FROM leituraptqa
-         WHERE dataleitura BETWEEN :inicio AND :fim
-           AND umidade > 70
-         ORDER BY umidade DESC";
-
-$stmt4 = $conecta->prepare($sql4);
-$stmt4->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
-$umidades_altas = $stmt4->fetchAll(PDO::FETCH_ASSOC);
-
-/* =====================================================
-   JSON PARA O JS
+   JSON PARA O JAVASCRIPT
    ===================================================== */
 if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     header('Content-Type: application/json; charset=utf-8');
 
     echo json_encode([
-        'lista' => $lista_temperaturas,
-        'media_periodo' => $media_resultado,
-        'max_min_med' => $max_min_med,
-        'umidade_alta' => $umidades_altas
+        'co2_acima_1000' => $co2_acima_1000,
+        'co2_maximo_periodo' => $co2_maximo_periodo,
+        'top5_medias_co2' => $top5_medias_co2
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
     exit;
@@ -81,9 +69,8 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Gráficos de Temperatura - PTQA</title>
+<title>Gráficos de CO2 - PTQA</title>
 <link rel="stylesheet" href="../../frontend/style_mabel.css">
-    
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="./script.js"></script>
@@ -104,7 +91,6 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 </head>
 
 <body>
-    <!-- Barra de Navegação -->
     <header>
         <nav class="navbar">
             <div class="logo">IFSC <span>Chapecó</span></div>
@@ -114,7 +100,6 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
         </nav>
     </header>   
 
-    <!-- Sidebar -->
     <div class="sidebar">
         <h2>Menu</h2>
         <a href="../aqi_ptqa/ptqa_aqi.php">Qualidade do ar</a>
@@ -124,35 +109,35 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
         <a href="../temperatura_ptqa/temperature.php">Temperatura e umidade</a>
     </div>
 
-    <!-- Conteúdo Principal -->
-    <div class="content">
-        <h1>Gráficos de Temperatura</h1>
+<section class="grafico-section">
+    <h1>Análises de CO₂</h1>
 
-        <form method="get">
-            <label>Início:</label>
-            <input type="date" name="inicio" value="<?= $data_inicial ?>">
-            <label>Fim:</label>
-            <input type="date" name="fim" value="<?= $data_final ?>">
-            <button type="submit">Filtrar</button>
-        </form>
+    <form method="get">
+        <label>Início:</label>
+        <input type="date" name="inicio" value="<?= $data_inicial ?>">
+        <label>Fim:</label>
+        <input type="date" name="fim" value="<?= $data_final ?>">
+        <button type="submit">Filtrar</button>
+    </form>
 
-        <div id="loading">Carregando dados...</div>
+    <div class="loading" id="loading">Carregando dados...</div>
 
-        <h2>Temperatura ao longo do tempo</h2>
-        <canvas id="graficoTemperatura" height="400"></canvas>
+    <h2>Registros com CO₂ acima de 1000 ppm</h2>
+    <canvas id="graficoAcima"></canvas>
 
-        <h2>Temperatura Média</h2>
-        <p id="valorMedia">Carregando...</p>
+    <h2>Maior concentração no período</h2>
+    <p id="co2Max"></p>
 
-        <h2>Máxima / Mínima / Média</h2>
-        <canvas id="graficoMaxMinMed" height="300"></canvas>
+    <h2>Top 5 dias do mês com maior média de CO₂</h2>
+    <canvas id="graficoTop5"></canvas>
+</section>
 
-        <h2>Registros com Umidade acima de 70%</h2>
-        <canvas id="graficoUmidade" height="300"></canvas>
-    </div>
+<script>
+const dataInicial = "<?= $data_inicial ?>";
+const dataFinal = "<?= $data_final ?>";
+</script>
 
-    <!-- Incluir o arquivo JavaScript -->
-    <script src="temperatura.js"></script>
+<script src="co2.js"></script>
+
 </body>
-
 </html>
