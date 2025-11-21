@@ -1,231 +1,392 @@
+/*
+ * ============================================================
+ * 1. BASE: RESET, FONTES E CORES GLOBAIS
+ * ============================================================
+ */
+ :root {
+  /* Cores do Projeto */
+  --cor-primaria: #0c3e1e;       /* Verde Escuro (Sidebar, Títulos) */
+  --cor-secundaria: #1ea44e;     /* Verde Claro (Destaque, Botões) */
+  --cor-fundo: #f5f5f5;          /* Fundo da Página */
+  --cor-box: #e6f3e9;            /* Fundo de caixas de destaque */
+  --cor-texto-claro: #f1f1f1;    /* Texto em fundos escuros */
+  --cor-sombra: rgba(0,0,0,0.1); /* Sombra Padrão */
+}
 
 body {
-    margin: 0;
-    font-family: 'Arial', sans-serif;
-    background-color: #f5f5f5;
-    color: #222;
-  }
-
-  .navbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 60px;
-    background-color: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    position: sticky;
-    top: 0;
-    z-index: 9999;
-  }
-  
-
-  .logo img {
-    height: 70px;
-  }
-  
-  .navbar ul {
-    list-style: none;
-    display: flex;
-    gap: 35px;
-    margin: 0;
-  }
-  
-  .navbar a {
-    text-decoration: none;
-    color: #0c3e1e;
-    font-weight: bold;
-    font-size: 17px;
-    transition: color 0.3s;
-  }
-  
-  .navbar a:hover {
-    color: #1ea44e;
-  }
-
-  .hero {
-    position: relative;
-    width: 100%;
-    height: 500px;
-    overflow: hidden;
-  }
-  
-  .hero-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: brightness(60%);
-  }
-  
-  .overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: white;
-  }
-  
-  .overlay h1 {
-    font-size: 40px;
-    margin-bottom: 10px;
-  }
-  
-  .overlay h2 {
-    font-size: 22px;
-    font-weight: normal;
-  }
-  
-
-  .projetos {
-    background: linear-gradient(to bottom, #0c3e1e 0%, #1d6b2f 100%);
-    color: white;
-    text-align: center;
-    padding: 60px 0;
-  }
-  
-  .projetos h3 {
-    font-size: 26px;
-    margin-bottom: 20px;
-  }
-  
-  .linha {
-    width: 60px;
-    height: 3px;
-    background-color: white;
-    margin: 0 auto 30px;
-  }
-  
-  .cards-projetos {
-    display: flex;
-    justify-content: center;
-    gap: 80px;
-  }
-  
-  .projeto {
-    text-align: center;
-  }
-  
-  .projeto img {
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    border: 3px solid white;
-    object-fit: cover;
-    margin-bottom: 15px;
-  }
-  
-  .projeto p {
-    font-weight: bold;
-    font-size: 18px;
-  }
-  
-  .devs {
-    background-color: #f1f1f1;
-    text-align: center;
-    padding: 70px 0;
-  }
-  
-  .devs h3 {
-    font-size: 28px;
-    color: #1b4d25;
-  }
-  
-  .cards-devs {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 50px;
-    margin-top: 40px;
-  }
-  
-  .dev {
-    background: white;
-    border-radius: 15px;
-    width: 180px;
-    height: 230px;
-    box-shadow: 0 3px 15px rgba(0,0,0,0.15);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 15px;
-  }
-  
-  .dev img {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    border: 3px solid #1b4d25;
-    object-fit: cover;
-    margin-bottom: 10px;
-  }
-  
-  .dev p {
-    font-weight: bold;
-    color: #222;
-  }
-/* ... (Seções anteriores como body, navbar, hero, projetos, devs permanecem iguais) ... */
-
-/* Estilização da Seção de Gráfico */
-.grafico-section {
-  background-color: #f9f9f9;
-  padding: 80px 60px;
-  text-align: center; /* <--- ADICIONADO: Centraliza texto e elementos inline */
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: var(--cor-fundo);
+  color: #222;
+  /* Espaçamento superior para a navbar fixa em TODAS as páginas */
+  padding-top: 90px; 
 }
 
-.grafico-section h1 {
-  color: #0c3e1e;
-  font-size: 32px;
-  margin-bottom: 40px;
-}
 
-form {
+/*
+* ============================================================
+* 2. NAVBAR (PADRÃO FIXO)
+* ============================================================
+*/
+.navbar {
   display: flex;
-  justify-content: center; /* JÁ EXISTE: Centraliza os itens do formulário (input/botão) */
   align-items: center;
-  gap: 10px;
-  margin: 0 auto 30px; /* ADICIONADO: Centraliza o formulário como um bloco (se for usado fora de um flexbox pai) */
-  max-width: 600px; /* ADICIONADO: Dá uma largura máxima para a centralização do bloco funcionar */
+  justify-content: space-between;
+  padding: 10px 60px;
+  background-color: white;
+  box-shadow: 0 2px 10px var(--cor-sombra);
+  position: fixed; /* Essencial para o padrão fixo */
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 9999;
 }
 
-form label {
+.logo img {
+  height: 70px;
+}
+/* Estilo para "IFSC Chapecó" quando não é uma imagem de logo */
+.logo {
+  color: var(--cor-primaria);
+  font-size: 24px;
   font-weight: bold;
+}
+.logo span {
+  color: var(--cor-secundaria);
+  font-weight: normal;
+}
+
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 35px;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: var(--cor-primaria);
+  font-weight: bold;
+  font-size: 17px;
+  transition: color 0.3s;
+}
+
+.navbar a:hover {
+  color: var(--cor-secundaria);
+}
+
+
+/*
+* ============================================================
+* 3. LAYOUT COM SIDEBAR (PÁGINAS MABEL)
+* ============================================================
+*/
+.sidebar {
+  width: 250px;
+  background-color: var(--cor-primaria); /* Cor escura mantida */
+  color: white;
+  padding: 20px 0;
+  min-height: 100vh;
+  position: fixed; /* Fixa a sidebar */
+  top: 0; 
+  left: 0;
+  z-index: 999;
+}
+
+.sidebar h2 {
+  text-align: center;
+  color: var(--cor-secundaria); /* Cor de destaque mantida */
+  margin-bottom: 20px;
+  padding: 0 15px;
+  padding-top: 80px; /* Espaçamento abaixo da navbar fixa */
+}
+
+.sidebar a {
+  display: block;
+  padding: 12px 25px;
+  text-decoration: none;
+  color: var(--cor-texto-claro);
+  font-size: 16px;
+  transition: background-color 0.3s, border-left 0.3s;
+  border-left: 5px solid transparent;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background-color: #1d6b2f; /* Um tom um pouco mais claro do verde escuro */
+  color: white;
+  border-left: 5px solid var(--cor-secundaria); 
+}
+
+.content {
+  margin-left: 250px; /* Cria espaço para a sidebar fixa */
+  padding: 20px 30px 30px 30px; 
+  flex-grow: 1;
+  max-width: calc(100% - 250px);
+}
+
+
+/*
+* ============================================================
+* 4. ESTILOS DE FORMULÁRIO E COMPONENTES
+* ============================================================
+*/
+
+/* Estilos de Formulário - GERAL (para páginas PTQA e o form da homepage) */
+body > form, /* Form sem sidebar (PTQA, temperature.php, etc.) */
+.grafico-section form { /* Form dentro da seção de gráfico */
+  display: flex;
+  justify-content: center; /* Centraliza no centro da página */
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--cor-sombra);
+  margin: 0 auto 30px; /* Centralização do bloco */
+  max-width: 800px;
+}
+
+/* Estilos de Formulário - SIDEBAR (para páginas MABEL) */
+.content #formPeriodo {
+  justify-content: flex-start; /* Alinha à esquerda dentro da área .content */
+  margin-left: 0;
+  margin-right: 0;
+  max-width: none;
+}
+
+/* Estilos de Input e Label */
+form label {
+  font-weight: 600;
   color: #1b4d25;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-form input,
-form button {
-  padding: 8px 12px;
-  border-radius: 6px;
+form input[type="date"],
+form input[type="text"],
+form select {
+  padding: 8px;
   border: 1px solid #ccc;
+  border-radius: 4px;
   font-size: 15px;
+  transition: border-color 0.3s;
 }
 
-form button {
-  background-color: #1ea44e;
+form input:focus,
+form select:focus {
+  border-color: var(--cor-secundaria);
+  outline: none;
+}
+
+/* Botão de Ação (Gerar Gráfico / Filtrar) */
+form button[type="submit"] {
+  padding: 8px 18px;
+  background-color: var(--cor-secundaria); 
   color: white;
   border: none;
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.1s;
 }
 
-form button:hover {
+form button[type="submit"]:hover {
   background-color: #148c3e;
 }
 
+form button[type="submit"]:active {
+  transform: scale(0.98);
+}
+
+
+/* Blocos de Média (TI, TE e Diferença) */
+.media-box,
+.content > div:nth-child(4) { 
+  display: inline-block;
+  padding: 15px 25px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  background-color: var(--cor-box);
+  border: 1px solid #cce0d1;
+  border-radius: 8px;
+  font-size: 18px;
+  color: var(--cor-primaria);
+}
+
+.media-box strong,
+.content > div:nth-child(4) strong {
+  font-weight: 700;
+  color: var(--cor-primaria);
+}
+
+#valorMedia,
+#valorMediaDif {
+  font-weight: 700;
+  color: var(--cor-secundaria);
+}
+
+
+/* Títulos e Gráficos */
+.content h1,
+.content h2,
+.grafico-section h1,
+.grafico-section h2 {
+  color: var(--cor-primaria);
+  border-bottom: 2px solid var(--cor-secundaria);
+  padding-bottom: 5px;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
 canvas {
-  max-width: 900px;
+  max-width: 100%;
   width: 100%;
   height: 400px;
-  margin: 40px auto; /* JÁ EXISTE: Centraliza o canvas (elemento de bloco) */
+  margin: 40px auto; /* Centraliza o bloco do gráfico */
   display: block;
   background: white;
   border-radius: 10px;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 12px var(--cor-sombra);
+}
+
+/*
+* ============================================================
+* 5. ESTILOS DE HOMEPAGE (index.html)
+* ============================================================
+*/
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  overflow: hidden;
+  margin-top: -90px; /* Compensa o padding-top do body para a imagem ocupar o topo */
+}
+
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(60%);
+}
+
+.overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: white;
+}
+
+.overlay h1 {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.overlay h2 {
+  font-size: 22px;
+  font-weight: normal;
+}
+
+.projetos {
+  background: linear-gradient(to bottom, var(--cor-primaria) 0%, #1d6b2f 100%);
+  color: white;
+  text-align: center;
+  padding: 60px 0;
+}
+
+.projetos h3 {
+  font-size: 26px;
+  margin-bottom: 20px;
+}
+
+.linha {
+  width: 60px;
+  height: 3px;
+  background-color: white;
+  margin: 0 auto 30px;
+}
+
+.cards-projetos {
+  display: flex;
+  justify-content: center;
+  gap: 80px;
+}
+
+.projeto {
+  text-align: center;
+}
+
+.projeto img {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 3px solid white;
+  object-fit: cover;
+  margin-bottom: 15px;
+}
+
+.projeto p {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.devs {
+  background-color: #f1f1f1;
+  text-align: center;
+  padding: 70px 0;
+}
+
+.devs h3 {
+  font-size: 28px;
+  color: #1b4d25;
+}
+
+.cards-devs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 50px;
+  margin-top: 40px;
+}
+
+.dev {
+  background: white;
+  border-radius: 15px;
+  width: 180px;
+  height: 230px;
+  box-shadow: 0 3px 15px var(--cor-sombra);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+}
+
+.dev img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid #1b4d25;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.dev p {
+  font-weight: bold;
+  color: #222;
 }
 
 .loading {
   font-size: 18px;
   color: #1b4d25;
   margin-bottom: 20px;
+  text-align: center;
 }

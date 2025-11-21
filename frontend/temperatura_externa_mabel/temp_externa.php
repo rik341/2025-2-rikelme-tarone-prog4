@@ -1,11 +1,9 @@
 <?php
 include 'conecta_mysql.php';
 
-// Define o período (com valores padrão)
 $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
 
-// Consulta SQL — junta data e hora reais da inclusão
 $sql = "SELECT 
           CONCAT(datainclusao, ' ', horainclusao) AS datahora_completa,
           te
@@ -18,7 +16,6 @@ $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $grafico = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
-// Consulta SQL — calcula a média da temperatura externa no intervalo
 $sql = "SELECT 
           ROUND(AVG(te), 2) AS media_temperatura_externa
         FROM leituramabel
@@ -28,7 +25,6 @@ $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $media = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Consulta SQL — calcula a diferença média entre te e ti
 $sql = "SELECT 
           AVG(ABS(te - ti)) AS media_diferenca
         FROM leituramabel
@@ -40,7 +36,6 @@ $dif = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
 if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
-// 4) Agora SIM devolve tudo junto
   header("Content-Type: application/json; charset=utf-8");
   echo json_encode([
       "dados"      => $grafico,
@@ -60,7 +55,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Temperatura Externa - MABEL</title>
     
-    <link rel="stylesheet" href="../../frontend/style_mabel.css">
+    <link rel="stylesheet" href="../../frontend/style.css">
     
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -109,4 +104,3 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     </main>
 </body>
 </html>
-

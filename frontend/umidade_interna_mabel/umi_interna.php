@@ -51,7 +51,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Temperatura Externa - MABEL</title>
     
-    <link rel="stylesheet" href="../../frontend/style_mabel.css">
+    <link rel="stylesheet" href="../style.css">
     
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -86,10 +86,10 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
         </form>
         
         <div id="mediaContainer" class="media-box">
-            <strong>Média da Temperatura Externa:</strong> <span id="MediaUmidade">--</span> °C
+            <strong>Média da umidade interna:</strong> <span id="MediaUmidade">--</span> °C
         </div>
 
-        <h2>Gráfico da Temperatura Externa</h2>
+        <h2>Gráfico da Umidade Interna</h2>
         <canvas id="graficoUmidadeInterna"></canvas>
         
     </main>

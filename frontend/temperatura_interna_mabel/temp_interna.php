@@ -6,13 +6,9 @@ ob_start();
 include 'conecta_mysql.php';
 
 
-// 1) Definir datas padrão
 $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
 
-/* ============================================================
-   2) CONSULTA: registros de temperatura interna (ti)
-============================================================ */
 $sql = "SELECT 
           CONCAT(datainclusao, ' ', horainclusao) AS datahora_completa,
           ti
@@ -24,9 +20,6 @@ $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $ti = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-/* ============================================================
-   3) CONSULTA: média geral da TI
-============================================================ */
 $sql = "SELECT ROUND(AVG(ti), 2) AS media_temperatura_interna
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim";
@@ -35,9 +28,6 @@ $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $media = $stmt->fetch(PDO::FETCH_ASSOC);
 
-/* ============================================================
-   4) CONSULTA: média diária da TI
-============================================================ */
 $sql = "SELECT 
           datainclusao,
           ROUND(AVG(ti), 2) AS media_diaria_ti
@@ -50,9 +40,6 @@ $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $mediadiaria = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-/* ============================================================
-   5) CONSULTA: diferença média entre TE e TI
-============================================================ */
 $sql = "SELECT AVG(ABS(te - ti)) AS media_diferenca
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim";
@@ -61,12 +48,9 @@ $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $dif = $stmt->fetch(PDO::FETCH_ASSOC);
 
-/* ============================================================
-   6) Retorno JSON (para o JS)
-============================================================ */
 if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 
-    ob_clean(); // limpa qualquer HTML que escapou
+    ob_clean();
     header("Content-Type: application/json; charset=utf-8");
 
     echo json_encode([
@@ -88,7 +72,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Temperatura Interna - MABEL</title>
     
-    <link rel="stylesheet" href="../../frontend/style_mabel.css">
+    <link rel="stylesheet" href="../style.css">
     
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -140,4 +124,3 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     </main>
 </body>
 </html>
-
