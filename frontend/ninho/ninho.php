@@ -6,11 +6,14 @@ $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
 
 /* ===========================================================
-   1) BUSCA REGISTROS COMPLETOS
+   1) BUSCA REGISTROS COMPLETOS COM FORMATAÇÃO
    =========================================================== */
 $sql = "SELECT 
-          CONCAT(datainclusao, ' ', horainclusao) AS datahora_completa,
-          ninho
+          DATE_FORMAT(
+              STR_TO_DATE(CONCAT(datainclusao, ' ', horainclusao), '%Y-%m-%d %H:%i:%s'),
+              '%d/%m/%Y %H:%i:%s'
+          ) AS datahora_completa,
+          ROUND(ninho, 1) AS ninho
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim
         ORDER BY datainclusao, horainclusao ASC";
@@ -20,9 +23,9 @@ $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $resultados_registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 /* ===========================================================
-   2) BUSCA MÁXIMA
+   2) BUSCA MÁXIMA FORMATADA
    =========================================================== */
-$sql = "SELECT MAX(ninho) AS temperatura_maxima
+$sql = "SELECT ROUND(MAX(ninho), 1) AS temperatura_maxima
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim";
 
@@ -32,9 +35,9 @@ $linhaMax = $stmt->fetch(PDO::FETCH_ASSOC);
 $temperatura_maxima = $linhaMax['temperatura_maxima'] ?? null;
 
 /* ===========================================================
-   3) BUSCA MÍNIMA
+   3) BUSCA MÍNIMA FORMATADA
    =========================================================== */
-$sql = "SELECT MIN(ninho) AS temperatura_minima
+$sql = "SELECT ROUND(MIN(ninho), 1) AS temperatura_minima
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim";
 
@@ -44,7 +47,7 @@ $linhaMin = $stmt->fetch(PDO::FETCH_ASSOC);
 $temperatura_minima = $linhaMin['temperatura_minima'] ?? null;
 
 /* ===========================================================
-   4) SE PEDIR JSON, RETORNA E SAI
+   4) JSON
    =========================================================== */
 if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     header("Content-Type: application/json; charset=utf-8");
@@ -59,8 +62,6 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     exit;
 }
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -95,20 +96,28 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     </div>
 
     <main class="content">
-        
-        <form id="formPeriodo">
-            <label>Início: <input type="date" id="inicio"></label>
-            <label>Fim: <input type="date" id="fim"></label>
-            <button type="submit">Gerar Gráfico</button>
-        </form>
+
+<form id="formPeriodo">
+    <label>Início:
+        <input type="date" id="inicio" value="2025-06-01">
+    </label>
+    <label>Fim:
+        <input type="date" id="fim" value="2025-06-07">
+    </label>
+    <label>Intervalo de Leitura:
+        <input type="number" id="intervalo" value="20" min="1" />
+    </label>
+    <button type="submit">Gerar Gráfico</button>
+</form>
+
         
         <div id="mediaContainer" class="media-box">
-            <strong>temperatura miníma do ninho</strong> 
+            <strong>temperatura máxima do ninho</strong> 
             <span id="valormax">--</span> °C
         </div>
         
         <div>
-            <strong>temperatura miníma do ninho</strong>
+            <strong>temperatura mínima do ninho</strong>
             <span id="valormin">--</span> °C
         </div>
         

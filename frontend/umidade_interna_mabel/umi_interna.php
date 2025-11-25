@@ -1,14 +1,19 @@
 <?php
 include 'conecta_mysql.php';
 
-// Define o período (com valores padrão)
+// Período com valores padrão
 $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
 
-// Consulta SQL — junta data e hora reais da inclusão
+/* ===========================================================
+   1) BUSCA REGISTROS COM FORMATAÇÃO DE DATA E VALORES
+   =========================================================== */
 $sql = "SELECT 
-          CONCAT(datainclusao, ' ', horainclusao) AS datahora_completa,
-          hi
+          DATE_FORMAT(
+              STR_TO_DATE(CONCAT(datainclusao, ' ', horainclusao), '%Y-%m-%d %H:%i:%s'),
+              '%d/%m/%Y %H:%i:%s'
+          ) AS datahora_completa,
+          ROUND(hi, 1) AS hi
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim
         ORDER BY datainclusao, horainclusao ASC";
@@ -17,11 +22,11 @@ $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-
-// Consulta SQL — calcula a média da umidade interna no intervalo
+/* ===========================================================
+   2) MÉDIA FORMATADA
+   =========================================================== */
 $sql = "SELECT 
-          ROUND(AVG(hi), 2) AS media_umidade_interna
+          ROUND(AVG(hi), 1) AS media_umidade_interna
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim";
 
@@ -31,6 +36,9 @@ $resultadomedia = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $media = $resultadomedia['media_umidade_interna'] ?? null;
 
+/* ===========================================================
+   3) JSON
+   =========================================================== */
 if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
   header("Content-Type: application/json; charset=utf-8");
 
@@ -41,8 +49,8 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 
   exit;
 }
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -79,11 +87,20 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 
     <main class="content">
         
-        <form id="formPeriodo">
-            <label>Início: <input type="date" id="inicio"></label>
-            <label>Fim: <input type="date" id="fim"></label>
-            <button type="submit">filtrar</button>
-        </form>
+<form id="formPeriodo">
+    <label>Início: 
+        <input type="date" id="inicio" value="2025-06-01">
+    </label>
+    <label>Fim: 
+        <input type="date" id="fim" value="2025-06-07">
+    </label>
+    <label>Intervalo de Leitura: 
+        <input type="number" id="intervalo" value="20" min="1">
+    </label>
+    <button type="submit">Gerar Gráfico</button>
+</form>
+
+
         
         <div id="mediaContainer" class="media-box">
             <strong>Média da umidade interna:</strong> <span id="MediaUmidade">--</span> °C

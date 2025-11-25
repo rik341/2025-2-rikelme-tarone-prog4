@@ -5,29 +5,46 @@ ob_start();
 
 include 'conecta_mysql.php';
 
-
 $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
 
+
+/* ----------------------------------------------------
+   1) REGISTROS COMPLETOS DA TEMPERATURA INTERNA (TI)
+------------------------------------------------------ */
+
 $sql = "SELECT 
-          CONCAT(datainclusao, ' ', horainclusao) AS datahora_completa,
-          ti
+          DATE_FORMAT(
+              STR_TO_DATE(CONCAT(datainclusao,' ',horainclusao), '%Y-%m-%d %H:%i:%s'),
+              '%d/%m/%Y %H:%i:%s'
+          ) AS datahora_completa,
+          ROUND(ti, 2) AS ti
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim
         ORDER BY datainclusao, horainclusao ASC";
 
 $stmt = $conecta->prepare($sql);
-$stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
+$stmt->execute([':inicio'=>$data_inicial, ':fim'=>$data_final]);
 $ti = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+/* ----------------------------------------------------
+   2) MÉDIA GERAL TI
+------------------------------------------------------ */
 
 $sql = "SELECT ROUND(AVG(ti), 2) AS media_temperatura_interna
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim";
 
 $stmt = $conecta->prepare($sql);
-$stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
+$stmt->execute([':inicio'=>$data_inicial, ':fim'=>$data_final]);
 $media = $stmt->fetch(PDO::FETCH_ASSOC);
-$media_ti_inicial = $media['media_temperatura_interna']; // Valor para HTML
+$media_ti_inicial = $media['media_temperatura_interna'] ?? null;
+
+
+/* ----------------------------------------------------
+   3) MÉDIA DIÁRIA
+------------------------------------------------------ */
 
 $sql = "SELECT 
           datainclusao,
@@ -38,34 +55,43 @@ $sql = "SELECT
         ORDER BY datainclusao ASC";
 
 $stmt = $conecta->prepare($sql);
-$stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
+$stmt->execute([':inicio'=>$data_inicial, ':fim'=>$data_final]);
 $mediadiaria = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+/* ----------------------------------------------------
+   4) DIFERENÇA ENTRE TI - TE
+------------------------------------------------------ */
 
 $sql = "SELECT ROUND(AVG(ABS(te - ti)), 2) AS media_diferenca
         FROM leituramabel
         WHERE datainclusao BETWEEN :inicio AND :fim";
 
 $stmt = $conecta->prepare($sql);
-$stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
+$stmt->execute([':inicio'=>$data_inicial, ':fim'=>$data_final]);
 $dif = $stmt->fetch(PDO::FETCH_ASSOC);
-$media_dif_inicial = $dif['media_diferenca']; // Valor para HTML
+$media_dif_inicial = $dif['media_diferenca'] ?? null;
+
+
+/* ----------------------------------------------------
+   5) RETORNO JSON
+------------------------------------------------------ */
 
 if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
-
     ob_clean();
     header("Content-Type: application/json; charset=utf-8");
 
     echo json_encode([
-        "registros_ti"  => $ti,
-        "media_ti"      => $media_ti_inicial,
-        "media_diaria"  => $mediadiaria,
-        "diferenca"     => $media_dif_inicial
+        "registros_ti" => $ti,
+        "media_ti"     => $media_ti_inicial,
+        "media_diaria" => $mediadiaria,
+        "diferenca"    => $media_dif_inicial
     ], JSON_UNESCAPED_UNICODE);
 
     exit;
 }
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -101,14 +127,17 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     </div>
      <main class="content">
 
-        <form id="formPeriodo">
-            <label>Início: <input type="date" id="inicio" value="<?= htmlspecialchars($data_inicial) ?>"></label>
-            <label>Fim: <input type="date" id="fim" value="<?= htmlspecialchars($data_final) ?>"></label>
-            <button type="submit">Gerar Gráfico</button>
-        </form>
+<form id="formPeriodo">
+    <label>Início: <input type="date" id="inicio"></label>
+    <label>Fim: <input type="date" id="fim"></label>
+    <label>Intervalo de Leitura: <input type="number" id="intervalo" value="20" min="1"></label>
+    <button type="submit">Gerar Gráfico</button>
+</form>
+
         
         <div id="mediaContainerTI" class="media-box">
-            <strong>Média da Temperatura Interna:</strong> <span id="valorMedia"><?= $media_ti_inicial ?? '--' ?></span> °C
+            <strong>Média da Temperatura Interna:</strong> <span id="valorMedia"><?= $media_ti_inicial ??
+                '--' ?></span> °C
         </div>
         <div id="mediaContainerDif" class="media-box">
              <strong>Diferença média (TI − TE):</strong>

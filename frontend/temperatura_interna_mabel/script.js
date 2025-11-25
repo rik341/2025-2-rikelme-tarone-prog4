@@ -1,129 +1,103 @@
 document.addEventListener("DOMContentLoaded", () => {
+
   const form = document.getElementById("formPeriodo");
+
   const spanMedia = document.getElementById("valorMedia");
   const spanDif = document.getElementById("valorMediaDif");
+
   const canvasRegistros = document.getElementById("graficoInterna");
   const canvasMediaDiaria = document.getElementById("graficoMediaDiaria");
 
   let chartRegistros = null;
   let chartMedia = null;
 
-  // Período padrão
   const padraoInicio = "2025-06-01";
   const padraoFim = "2025-06-07";
 
-  // inicializa inputs de data se existirem
-  if (document.getElementById("inicio")) document.getElementById("inicio").value = padraoInicio;
-  if (document.getElementById("fim")) document.getElementById("fim").value = padraoFim;
+  document.getElementById("inicio").value = padraoInicio;
+  document.getElementById("fim").value = padraoFim;
 
-  async function carregar(inicio = padraoInicio, fim = padraoFim) {
-    try {
-      const url = `temp_interna.php?formato=json&inicio=${inicio}&fim=${fim}`;
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const json = await resp.json();
 
-      // --- ler campos corretos vindos do PHP ---
-      const registros = json.registros_ti ?? [];
-      const mediaTi = json.media_ti ?? null;
-      const mediaDiaria = json.media_diaria ?? [];
-      const diferenca = json.diferenca ?? null;
+  async function carregar(inicio, fim) {
 
-      // atualizar spans (média e diferença)
-      spanMedia.textContent = (mediaTi !== null && mediaTi !== undefined) ? Number(mediaTi).toFixed(2) : "--";
-      spanDif.textContent = (diferenca !== null && diferenca !== undefined) ? Number(diferenca).toFixed(2) : "--";
+    const resp = await fetch(`temp_interna.php?formato=json&inicio=${inicio}&fim=${fim}`);
+    const json = await resp.json();
 
-      // --- preparar arrays para gráfico de registros ---
-      if (!Array.isArray(registros) || registros.length === 0) {
-        // limpa gráficos se não houver dados
-        if (chartRegistros) { chartRegistros.destroy(); chartRegistros = null; }
-      } else {
-        const labelsBruto = registros.map(r => r.datahora_completa);
-        const valoresBruto = registros.map(r => parseFloat(r.ti));
+    const registros = json.registros_ti || [];
+    const mediaTi = json.media_ti || null;
+    const mediaDiaria = json.media_diaria || [];
+    const diferenca = json.diferenca || null;
 
-        // reduzir pontos (amostragem)
-        const step = 20;
-        const labels = labelsBruto.filter((_, i) => i % step === 0);
-        const valores = valoresBruto.filter((_, i) => i % step === 0);
+    spanMedia.textContent = mediaTi ? Number(mediaTi).toFixed(2) : "--";
+    spanDif.textContent   = diferenca ? Number(diferenca).toFixed(2) : "--";
 
-        if (chartRegistros) chartRegistros.destroy();
-        const ctx1 = canvasRegistros.getContext("2d");
-        chartRegistros = new Chart(ctx1, {
-          type: "line",
-          data: {
-            labels,
-            datasets: [{
-              label: "Temperatura Interna (°C)",
-              data: valores,
-              borderColor: "red",
-              borderWidth: 2.5,
-              tension: 0.3,
-              pointRadius: 0
-            }]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              x: { title: { display: true, text: "Data e Hora" } },
-              y: { title: { display: true, text: "Temperatura (°C)" } }
-            },
-            plugins: {
-              decimation: { enabled: true, algorithm: "min-max" }
-            }
-          }
-        });
-      }
+    const intervalo = parseInt(document.getElementById("intervalo").value) || 20;
 
-      // --- gráfico média diária (barra) ---
-      if (!Array.isArray(mediaDiaria) || mediaDiaria.length === 0) {
-        if (chartMedia) { chartMedia.destroy(); chartMedia = null; }
-      } else {
-        const labelsMed = mediaDiaria.map(d => d.datainclusao);
-        // a coluna do PHP é media_diaria_ti
-        const valoresMed = mediaDiaria.map(d => parseFloat(d.media_diaria_ti));
 
-        if (chartMedia) chartMedia.destroy();
-        const ctx2 = canvasMediaDiaria.getContext("2d");
-        chartMedia = new Chart(ctx2, {
-          type: "bar",
-          data: {
-            labels: labelsMed,
-            datasets: [{
-              label: "Média Diária da Temp. Interna (°C)",
-              data: valoresMed,
-              backgroundColor: "orange"
-            }]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              x: { title: { display: true, text: "Data" } },
-              y: { title: { display: true, text: "Temperatura (°C)" } }
-            }
-          }
-        });
-      }
+    /* ----------------------------------------
+       Gráfico 1 — TI Completa
+    ---------------------------------------- */
+    if (chartRegistros) chartRegistros.destroy();
 
-    } catch (err) {
-      console.error("Erro ao carregar dados:", err);
-      spanMedia.textContent = "--";
-      spanDif.textContent = "--";
-      if (chartRegistros) { chartRegistros.destroy(); chartRegistros = null; }
-      if (chartMedia) { chartMedia.destroy(); chartMedia = null; }
+    if (registros.length > 0) {
+
+      const labelsBruto = registros.map(r => r.datahora_completa);
+      const valoresBruto = registros.map(r => parseFloat(r.ti));
+
+      const labels = labelsBruto.filter((_, i) => i % intervalo === 0);
+      const valores = valoresBruto.filter((_, i) => i % intervalo === 0);
+
+      chartRegistros = new Chart(canvasRegistros.getContext("2d"), {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{
+            label: "Temperatura Interna (°C)",
+            data: valores,
+            borderColor: "red",
+            borderWidth: 2.5,
+            tension: 0.35,
+            pointRadius: 0
+          }]
+        }
+      });
     }
+
+
+    /* ----------------------------------------
+       Gráfico 2 — Média Diária
+    ---------------------------------------- */
+    if (chartMedia) chartMedia.destroy();
+
+    if (mediaDiaria.length > 0) {
+
+      const labelsMed = mediaDiaria.map(d => d.datainclusao);
+      const valoresMed = mediaDiaria.map(d => parseFloat(d.media_diaria_ti));
+
+      chartMedia = new Chart(canvasMediaDiaria.getContext("2d"), {
+        type: "bar",
+        data: {
+          labels: labelsMed,
+          datasets: [{
+            label: "Média Diária (°C)",
+            data: valoresMed,
+            backgroundColor: "orange"
+          }]
+        }
+      });
+    }
+
   }
 
-  // carregar inicial
+
   carregar(padraoInicio, padraoFim);
 
-  // evento do formulário (se existir)
-  if (form) {
-    form.addEventListener("submit", e => {
-      e.preventDefault();
-      const inicio = document.getElementById("inicio").value || padraoInicio;
-      const fim = document.getElementById("fim").value || padraoFim;
-      carregar(inicio, fim);
-    });
-  }
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    carregar(
+      document.getElementById("inicio").value,
+      document.getElementById("fim").value
+    );
+  });
 
 });
