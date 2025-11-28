@@ -49,7 +49,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 <head>
     <meta charset="UTF-8">
     <title>Gráfico TVOC</title>
-    <link rel="stylesheet" href="../../frontend/style_mabel.css">
+    <link rel="stylesheet" href="../../frontend/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -88,11 +88,11 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     </div>
 
     <!-- Seção do gráfico -->
-    <section class="grafico-section">
+    <section class="content" >
         <h1>Gráfico de TVOC Acima de 200 ppb</h1>
 
         <!-- Filtro de datas -->
-        <form method="get">
+        <form id="formPeriodo" >
             <label>Data inicial:</label>
             <input type="date" name="inicio" value="<?php echo $data_inicial; ?>">
             <label>Data final:</label>

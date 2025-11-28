@@ -3,13 +3,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const url = `temperature.php?formato=json&inicio=${dataInicial}&fim=${dataFinal}`;
     const loading = document.getElementById("loading");
 
-    /* =============================
-       1) BUSCAR DADOS DO PHP
-       ============================= */
     let resp;
     try {
         resp = await fetch(url);
-
         if (!resp.ok) {
             loading.textContent = "Erro ao buscar dados do servidor.";
             return;
@@ -23,11 +19,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     loading.style.display = "none";
 
     /* =============================
-       2) GRÁFICO DE TEMPERATURA
-       ============================= */
-    if (dados.lista.length === 0) {
+         GRAFICO TEMPERATURA
+    ============================= */
+    if (!dados.lista || dados.lista.length === 0) {
         document.getElementById("graficoTemperatura").outerHTML =
-            "<p>Nenhum dado de temperatura encontrado no período.</p>";
+            "<p>Nenhum dado encontrado no período.</p>";
     } else {
         const labelsTemp = dados.lista.map(t => `${t.data} ${t.hora}`);
         const valoresTemp = dados.lista.map(t => Number(t.temperatura));
@@ -43,24 +39,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                     borderWidth: 2,
                     fill: false
                 }]
-            },
-            options: {
-                responsive: true,
-                scales: { y: { beginAtZero: false } }
             }
         });
     }
 
-    /* =============================
-       3) TEMPERATURA MÉDIA
-       ============================= */
+    /* MÉDIA */
     const media = dados.media_periodo?.temperatura_media;
     document.getElementById("valorMedia").textContent =
-        media ? `${Number(media).toFixed(2)} °C` : "Sem dados no período";
+        media ? `${Number(media).toFixed(2)} °C` : "Sem dados";
 
-    /* =============================
-       4) GRÁFICO MÁX / MIN / MÉD
-       ============================= */
+    /* MAX/MIN/MEDIA */
     if (dados.max_min_med) {
         new Chart(document.getElementById("graficoMaxMinMed"), {
             type: "bar",
@@ -75,20 +63,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                     ],
                     backgroundColor: ["red", "blue", "green"]
                 }]
-            },
-            options: {
-                responsive: true,
-                scales: { y: { beginAtZero: false } }
             }
         });
     }
 
-    /* =============================
-       5) GRÁFICO UMIDADE > 70%
-       ============================= */
-    if (dados.umidade_alta.length === 0) {
+    /* UMIDADE > 70% */
+    if (!dados.umidade_alta || dados.umidade_alta.length === 0) {
         document.getElementById("graficoUmidade").outerHTML =
-            "<p>Nenhum registro de umidade acima de 70%.</p>";
+            "<p>Nenhum registro acima de 70%.</p>";
     } else {
         const labelsUmidade = dados.umidade_alta.map(u => `${u.data} ${u.hora}`);
         const valoresUmidade = dados.umidade_alta.map(u => Number(u.umidade));
@@ -100,14 +82,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 datasets: [{
                     label: "Umidade (%)",
                     data: valoresUmidade,
-                    backgroundColor: "rgba(54,162,235,0.7)",
-                    borderColor: "blue",
-                    borderWidth: 2
+                    backgroundColor: "rgba(54,162,235,0.7)"
                 }]
-            },
-            options: {
-                responsive: true,
-                scales: { y: { beginAtZero: true } }
             }
         });
     }

@@ -51,7 +51,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 <head>
   <meta charset="UTF-8">
   <title>Consulta de Qualidade do Ar - PTQA</title>
-  <link rel="stylesheet" href="../../frontend/style_mabel.css">
+  <link rel="stylesheet" href="../../frontend/style.css">
     
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

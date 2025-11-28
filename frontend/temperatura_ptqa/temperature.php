@@ -82,77 +82,69 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 <head>
 <meta charset="UTF-8">
 <title>Gráficos de Temperatura - PTQA</title>
-<link rel="stylesheet" href="../../frontend/style_mabel.css">
-    
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script defer src="./script.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .grafico-section {
-            width: 80%;
-            margin: 0 auto;
-            text-align: center;
-        }
-        canvas {
-            max-width: 100%;
-            height: 400px;
-        }
-    </style>
+<link rel="stylesheet" href="../../frontend/style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- VARIÁVEIS PHP -> JS -->
+<script>
+    const dataInicial = "<?= $data_inicial ?>";
+    const dataFinal   = "<?= $data_final ?>";
+</script>
+
+<script defer src="./temperatura.js"></script>
+
+<style>
+    body { font-family: Arial, sans-serif; }
+    canvas { max-width: 100%; }
+</style>
 </head>
 
 <body>
-    <!-- Barra de Navegação -->
-    <header>
-        <nav class="navbar">
-            <div class="logo">IFSC <span>Chapecó</span></div>
-            <ul class="nav-links">
-                <li><a href="../index.html">Início</a></li>
-            </ul>
-        </nav>
-    </header>   
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h2>Menu</h2>
-        <a href="../aqi_ptqa/ptqa_aqi.php">Qualidade do ar</a>
-        <a href="../co2_ptqa/co2.php">Emissões de CO2</a>
-        <a href="../gases_ptqa/ptqa_gases.php">Gases Voláteis</a>
-        <a href="../pressao_ptqa/pressao_ptqa.php">Pressão atmosférica</a>
-        <a href="../temperatura_ptqa/temperature.php">Temperatura e umidade</a>
-    </div>
+<header>
+    <nav class="navbar">
+        <div class="logo">IFSC <span>Chapecó</span></div>
+        <ul class="nav-links">
+            <li><a href="../index.html">Início</a></li>
+        </ul>
+    </nav>
+</header>
 
-    <!-- Conteúdo Principal -->
-    <div class="content">
-        <h1>Gráficos de Temperatura</h1>
+<div class="sidebar">
+    <h2>Menu</h2>
+    <a href="../aqi_ptqa/ptqa_aqi.php">Qualidade do ar</a>
+    <a href="../co2_ptqa/co2.php">Emissões de CO2</a>
+    <a href="../gases_ptqa/ptqa_gases.php">Gases Voláteis</a>
+    <a href="../pressao_ptqa/pressao_ptqa.php">Pressão atmosférica</a>
+    <a href="../temperatura_ptqa/temperature.php">Temperatura e umidade</a>
+</div>
 
-        <form method="get">
-            <label>Início:</label>
-            <input type="date" name="inicio" value="<?= $data_inicial ?>">
-            <label>Fim:</label>
-            <input type="date" name="fim" value="<?= $data_final ?>">
-            <button type="submit">Filtrar</button>
-        </form>
+<div class="content">
+    <h1>Gráficos de Temperatura</h1>
 
-        <div id="loading">Carregando dados...</div>
+    <form if= "formperiodo">
+        <label>Início:</label>
+        <input type="date" name="inicio" value="<?= $data_inicial ?>">
+        <label>Fim:</label>
+        <input type="date" name="fim" value="<?= $data_final ?>">
+        <button type="submit">Filtrar</button>
+    </form>
 
-        <h2>Temperatura ao longo do tempo</h2>
-        <canvas id="graficoTemperatura" height="400"></canvas>
+    <div id="loading">Carregando dados...</div>
 
-        <h2>Temperatura Média</h2>
-        <p id="valorMedia">Carregando...</p>
+    <h2>Temperatura Média</h2>
+    <p id="valorMedia">Carregando...</p>
 
-        <h2>Máxima / Mínima / Média</h2>
-        <canvas id="graficoMaxMinMed" height="300"></canvas>
+    <h2>Temperatura ao longo do tempo</h2>
+    <canvas id="graficoTemperatura" height="400"></canvas>
 
-        <h2>Registros com Umidade acima de 70%</h2>
-        <canvas id="graficoUmidade" height="300"></canvas>
-    </div>
+    <h2>Máxima / Mínima / Média</h2>
+    <canvas id="graficoMaxMinMed" height="300"></canvas>
 
-    <!-- Incluir o arquivo JavaScript -->
-    <script src="temperatura.js"></script>
+    <h2>Registros com Umidade acima de 70%</h2>
+    <canvas id="graficoUmidade" height="300"></canvas>
+</div>
+
 </body>
-
 </html>

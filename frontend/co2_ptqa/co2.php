@@ -70,10 +70,10 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 <head>
 <meta charset="UTF-8">
 <title>Gráficos de CO2 - PTQA</title>
-<link rel="stylesheet" href="../../frontend/style_mabel.css">
+<link rel="stylesheet" href="../../frontend/style.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script defer src="./script.js"></script>
+    <script defer src="co2.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -109,24 +109,28 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
         <a href="../temperatura_ptqa/temperature.php">Temperatura e umidade</a>
     </div>
 
-<section class="grafico-section">
+<section class="content">
     <h1>Análises de CO₂</h1>
 
-    <form method="get">
-        <label>Início:</label>
-        <input type="date" name="inicio" value="<?= $data_inicial ?>">
-        <label>Fim:</label>
-        <input type="date" name="fim" value="<?= $data_final ?>">
-        <button type="submit">Filtrar</button>
-    </form>
+<form id="formPeriodo">
+    <label>Início:</label>
+    <input type="date" id="inicio" name="inicio" value="<?= $data_inicial ?>">
+
+    <label>Fim:</label>
+    <input type="date" id="fim" name="fim" value="<?= $data_final ?>">
+
+    <button type="submit">Filtrar</button>
+</form>
 
     <div class="loading" id="loading">Carregando dados...</div>
+    <div id="mediaContainer" class="media-box" >
+    <strong>Maior concentração no período</strong>
+    <span id="co2Max">--</span>
+    </div>
 
     <h2>Registros com CO₂ acima de 1000 ppm</h2>
     <canvas id="graficoAcima"></canvas>
 
-    <h2>Maior concentração no período</h2>
-    <p id="co2Max"></p>
 
     <h2>Top 5 dias do mês com maior média de CO₂</h2>
     <canvas id="graficoTop5"></canvas>
@@ -137,7 +141,6 @@ const dataInicial = "<?= $data_inicial ?>";
 const dataFinal = "<?= $data_final ?>";
 </script>
 
-<script src="co2.js"></script>
 
 </body>
 </html>

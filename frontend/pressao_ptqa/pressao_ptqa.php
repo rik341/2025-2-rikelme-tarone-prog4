@@ -47,11 +47,11 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 <head>
   <meta charset="UTF-8">
   <title>Gráficos de Pressão - PTQA</title>
-  <link rel="stylesheet" href="../../frontend/style_mabel.css">
+  <link rel="stylesheet" href="../../frontend/style.css">
     
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script defer src="./script.js"></script>
+    <script defer src="./pressao.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -86,11 +86,11 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
         <a href="../pressao_ptqa/pressao_ptqa.php">Pressão atmosférica</a>
         <a href="../temperatura_ptqa/temperature.php">Temperatura e umidade</a>
     </div>
-
+<section class="content">
 <h1>Gráficos de Pressão Atmosférica</h1>
 
 <!-- Filtro -->
-<form method="get">
+<form id="formPeriodo" >
     <label>Data inicial:</label>
     <input type="date" name="inicio" value="<?php echo $data_inicial; ?>">
     <label>Data final:</label>
@@ -102,6 +102,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 
 <canvas id="graficoPressaoBaixa" width="800" height="400"></canvas>
 <canvas id="graficoPressaoMinima" width="800" height="400" style="margin-top: 50px;"></canvas>
+    </section>
 
 <!-- Passa as datas para JS -->
 <script>
