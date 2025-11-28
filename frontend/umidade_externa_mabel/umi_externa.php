@@ -57,7 +57,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Umidade Externa - MABEL</title>
 
-    <link rel="stylesheet" href="../../frontend/style_mabel.css">
+    <link rel="stylesheet" href="../../frontend/style.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="script.js"></script>
