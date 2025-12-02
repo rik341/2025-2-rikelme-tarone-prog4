@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
        1) GRÁFICO CO₂ ACIMA DE 1000 ppm
        ----------------------------------------- */
     const labelsAcima = dados.co2_acima_1000.map(l => `${l.data} ${l.hora}`);
-    const valoresAcima = dados.co2_acima_1000.map(l => Number(l.co2));
+    const valoresAcima = dados.co2_acima_1000.map(l => Number(l.eco2));
 
     new Chart(document.getElementById("graficoAcima"), {
         type: "line",
@@ -21,8 +21,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                 data: valoresAcima,
                 borderColor: "red",
                 borderWidth: 2,
-                fill: false
+                fill: false,
+                pointRadius: 3,
+                tension: 0.3
             }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { title: { display: true, text: "Data e Hora" } },
+                y: { title: { display: true, text: "ppm" }, beginAtZero: false }
+            }
         }
     });
 
@@ -48,6 +57,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 data: valoresTop,
                 backgroundColor: "green"
             }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { title: { display: true, text: "Dia" } },
+                y: { title: { display: true, text: "ppm" }, beginAtZero: false }
+            }
         }
     });
 });

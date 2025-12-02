@@ -6,11 +6,11 @@ $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
 
 /* =====================================================
-   1) CO2 > 1000 ppm NO PERÍODO
+   1) CO2 > 1000 ppm — DATA E HORA FORMATADAS
    ===================================================== */
 $sql1 = "SELECT 
-            dataleitura AS data,
-            horaleitura AS hora,
+            DATE_FORMAT(dataleitura, '%d/%m/%Y') AS data,
+            DATE_FORMAT(horaleitura, '%H:%i:%s') AS hora,
             eco2
          FROM leituraptqa
          WHERE dataleitura BETWEEN :inicio AND :fim
@@ -33,12 +33,12 @@ $stmt2->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $co2_maximo_periodo = $stmt2->fetch(PDO::FETCH_ASSOC);
 
 /* =====================================================
-   3) TOP 5 DIAS DO MÊS COM MAIOR MÉDIA DE CO2
+   3) TOP 5 DIAS DO MÊS — MÉDIA DE CO2
    ===================================================== */
-$mes = substr($data_inicial, 0, 7); // Ex.: "2025-06"
+$mes = substr($data_inicial, 0, 7);
 
 $sql3 = "SELECT 
-            dataleitura AS dia,
+            DATE_FORMAT(dataleitura, '%d/%m/%Y') AS dia,
             AVG(eco2) AS media_co2
          FROM leituraptqa
          WHERE dataleitura LIKE :mesFiltro
@@ -65,6 +65,8 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     exit;
 }
 ?>
+
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>

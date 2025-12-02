@@ -1,7 +1,10 @@
 document.addEventListener("DOMContentLoaded", async () => {
+    const loading = document.getElementById("loading");
+
+    const dataInicial = document.querySelector("input[name='inicio']").value;
+    const dataFinal = document.querySelector("input[name='fim']").value;
 
     const url = `temperature.php?formato=json&inicio=${dataInicial}&fim=${dataFinal}`;
-    const loading = document.getElementById("loading");
 
     const intervalo = parseInt(document.getElementById("intervalo").value) || 20;
 
@@ -102,5 +105,4 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
     }
-
 });

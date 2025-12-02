@@ -20,6 +20,12 @@ $stmt1 = $conecta->prepare($sql1);
 $stmt1->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $lista_temperaturas = $stmt1->fetchAll(PDO::FETCH_ASSOC);
 
+// Formatar as datas e horas para o formato brasileiro (DD/MM/AAAA HH:MM)
+foreach ($lista_temperaturas as &$registro) {
+    $registro['data'] = date('d/m/Y', strtotime($registro['data']));
+    $registro['hora'] = date('H:i', strtotime($registro['hora']));
+}
+
 /* =====================================================
    2) TEMPERATURA MÉDIA
    ===================================================== */
@@ -61,6 +67,12 @@ $stmt4 = $conecta->prepare($sql4);
 $stmt4->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $umidades_altas = $stmt4->fetchAll(PDO::FETCH_ASSOC);
 
+// Formatar as datas e horas para o formato brasileiro (DD/MM/AAAA HH:MM)
+foreach ($umidades_altas as &$registro) {
+    $registro['data'] = date('d/m/Y', strtotime($registro['data']));
+    $registro['hora'] = date('H:i', strtotime($registro['hora']));
+}
+
 /* =====================================================
    JSON PARA O JS
    ===================================================== */
@@ -77,6 +89,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -124,7 +137,12 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 <div class="content">
     <h1>Gráficos de Temperatura</h1>
 
+<<<<<<< Updated upstream
     <form id="formPeriodo">
+=======
+    <!-- Corrigido o "if" e o atributo do formulário -->
+    <form method="get" action="temperature.php">
+>>>>>>> Stashed changes
         <label>Início:</label>
         <input type="date" name="inicio" value="<?= $data_inicial ?>">
         <label>Fim:</label>

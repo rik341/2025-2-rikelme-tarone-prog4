@@ -361,3 +361,51 @@ canvas {
 .dev img {
   width: 90px;
 }
+
+
+table {
+  width: 80%;
+  margin: 20px auto;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+thead {
+  background: #2e7d32; /* verde forte */
+  color: white;
+}
+
+thead th {
+  padding: 12px 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+tbody tr:nth-child(even) {
+  background: #e8f5e9; /* verde bem claro */
+}
+
+tbody tr:nth-child(odd) {
+  background: #f1f8f2; /* quase branco com toque verde */
+}
+
+tbody tr:hover {
+  background: #c8e6c9; /* verde suave no hover */
+  transition: 0.2s;
+}
+
+tbody td {
+  padding: 10px;
+  text-align: center;
+  color: #1b5e20;
+  font-weight: 500;
+  border-bottom: 1px solid #c5e1c6;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}

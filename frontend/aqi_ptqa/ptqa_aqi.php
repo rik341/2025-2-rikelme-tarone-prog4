@@ -9,7 +9,7 @@ $data_final   = $_GET['fim'] ?? '2025-06-30';
 // CONSULTA 1 — AQI ≥ 4
 // ---------------------------
 $sql = "SELECT 
-          CONCAT(dataleitura, ' ', horaleitura) AS datahora_completa,
+          DATE_FORMAT(CONCAT(dataleitura, ' ', horaleitura), '%d/%m/%Y %H:%i:%s') AS datahora_completa,
           aqi
         FROM leituraptqa
         WHERE dataleitura BETWEEN :inicio AND :fim
@@ -21,27 +21,40 @@ $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $resultado_ruim = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // ---------------------------
-// CONSULTA 2 — AQI = 1 (ÓTIMO)
+// CONSULTA 2 — AQI = 1 (PRIMEIRA LEITURA DO DIA)
 // ---------------------------
 $sql2 = "SELECT 
-           dataleitura,
-           horaleitura,
-           aqi
-         FROM leituraptqa
-         WHERE dataleitura BETWEEN :inicio AND :fim
-           AND aqi = 1
-         ORDER BY dataleitura, horaleitura ASC";
+            DATE_FORMAT(t1.dataleitura, '%d/%m/%Y') AS dataleitura,
+            t1.horaleitura,
+            t1.aqi
+         FROM leituraptqa t1
+         JOIN (
+             SELECT 
+                 DATE(dataleitura) AS data_dia,
+                 MIN(horaleitura) AS primeira_hora
+             FROM leituraptqa
+             WHERE dataleitura BETWEEN :inicio AND :fim
+               AND aqi = 1
+             GROUP BY DATE(dataleitura)
+         ) t2
+           ON DATE(t1.dataleitura) = t2.data_dia
+          AND t1.horaleitura = t2.primeira_hora
+         WHERE t1.aqi = 1
+         ORDER BY t1.dataleitura ASC";
 
 $stmt2 = $conecta->prepare($sql2);
 $stmt2->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $resultado_otimo = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
-// Retorno JSON (somente para o gráfico AQI ≥ 4)
+// ---------------------------
+// RETORNO JSON PARA O GRÁFICO
+// ---------------------------
 if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
   header('Content-Type: application/json; charset=utf-8');
   echo json_encode([
-    "ruim" => $resultado_ruim
-  ]);
+    "ruim"  => $resultado_ruim,
+    "otimo" => $resultado_otimo
+  ], JSON_UNESCAPED_UNICODE);
   exit;
 }
 ?>
@@ -52,100 +65,92 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
   <meta charset="UTF-8">
   <title>Consulta de Qualidade do Ar - PTQA</title>
   <link rel="stylesheet" href="../../frontend/style.css">
-    
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script defer src="./script.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .grafico-section {
-            width: 80%;
-            margin: 0 auto;
-            text-align: center;
-        }
-        canvas {
-            max-width: 100%;
-            height: 400px;
-        }
-    </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="./aqi.js"></script>
+
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .grafico-section { width: 80%; margin: 0 auto; text-align: center; }
+    canvas { max-width: 100%; height: 400px; }
+  </style>
 </head>
 
 <body>
-    <header>
-        <nav class="navbar">
-            <div class="logo">IFSC <span>Chapecó</span></div>
-            <ul class="nav-links">
-                <li><a href="../index.html">Início</a></li>
-            </ul>
-        </nav>
-    </header>   
 
-    <div class="sidebar">
-        <h2>Menu</h2>
-        <a href="../aqi_ptqa/ptqa_aqi.php">Qualidade do ar</a>
-        <a href="../co2_ptqa/co2.php">Emissões de CO2</a>
-        <a href="../gases_ptqa/ptqa_gases.php">Gases Voláteis</a>
-        <a href="../pressao_ptqa/pressao_ptqa.php">Pressão atmosférica</a>
-        <a href="../temperatura_ptqa/temperature.php">Temperatura e umidade</a>
-    </div>
+<header>
+    <nav class="navbar">
+        <div class="logo">IFSC <span>Chapecó</span></div>
+        <ul class="nav-links">
+            <li><a href="../index.html">Início</a></li>
+        </ul>
+    </nav>
+</header>
 
-  <section class="grafico-section">
-    <h1>Registros de Qualidade do Ar</h1>
+<div class="sidebar">
+    <h2>Menu</h2>
+    <a href="../aqi_ptqa/ptqa_aqi.php">Qualidade do ar</a>
+    <a href="../co2_ptqa/co2.php">Emissões de CO2</a>
+    <a href="../gases_ptqa/ptqa_gases.php">Gases Voláteis</a>
+    <a href="../pressao_ptqa/pressao_ptqa.php">Pressão atmosférica</a>
+    <a href="../temperatura_ptqa/temperature.php">Temperatura e umidade</a>
+</div>
 
-    <!-- Filtro -->
-    <form method="get">
-      <label>Data inicial:</label>
-      <input type="date" name="inicio" value="<?php echo $data_inicial; ?>">
-      <label>Data final:</label>
-      <input type="date" name="fim" value="<?php echo $data_final; ?>">
-      <button type="submit">Filtrar</button>
-    </form>
+<section class="content">
 
-    <div class="loading" id="loading">Carregando dados...</div>
+  <h1>Registros de Qualidade do Ar</h1>
 
-    <!-- GRÁFICO AQI ≥ 4 -->
-    <h2>Registros de Baixa Qualidade do Ar (AQI ≥ 4)</h2>
-    <canvas id="graficoAqi"></canvas>
+  <!-- Filtro -->
+  <form id="formprojeto">
+    <label>Data inicial:</label>
+    <input type="date" name="inicio" value="<?php echo $data_inicial; ?>">
+    <label>Data final:</label>
+    <input type="date" name="fim" value="<?php echo $data_final; ?>">
+    <button type="submit">Filtrar</button>
+  </form>
 
-    <!-- TABELA AQI = 1 -->
-    <h2>Registros de Ótima Qualidade do Ar (AQI = 1)</h2>
+  <div class="loading" id="loading">Carregando dados...</div>
 
-    <?php if (count($resultado_otimo) === 0): ?>
+  <!-- GRÁFICO AQI ≥ 4 -->
+  <h2>Registros de Baixa Qualidade do Ar (AQI ≥ 4)</h2>
+  <canvas id="graficoAqi"></canvas>
 
-        <p style="color:green;">Nenhum registro AQI = 1 encontrado no período.</p>
+  <!-- TABELA AQI = 1 -->
+  <h2>Registros de Ótima Qualidade do Ar (AQI = 1)</h2>
 
-    <?php else: ?>
+  <?php if (count($resultado_otimo) === 0): ?>
 
-    <table>
-        <thead>
+      <p style="color:green;">Nenhum registro AQI = 1 encontrado no período.</p>
+
+  <?php else: ?>
+
+  <table>
+      <thead>
+          <tr>
+              <th>Data</th>
+              <th>Hora</th>
+              <th>AQI</th>
+          </tr>
+      </thead>
+      <tbody>
+          <?php foreach ($resultado_otimo as $linha): ?>
             <tr>
-                <th>Data</th>
-                <th>Hora</th>
-                <th>AQI</th>
+              <td><?php echo $linha['dataleitura']; ?></td>
+              <td><?php echo $linha['horaleitura']; ?></td>
+              <td><?php echo $linha['aqi']; ?></td>
             </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($resultado_otimo as $linha): ?>
-              <tr>
-                <td><?php echo $linha['dataleitura']; ?></td>
-                <td><?php echo $linha['horaleitura']; ?></td>
-                <td><?php echo $linha['aqi']; ?></td>
-              </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+          <?php endforeach; ?>
+      </tbody>
+  </table>
 
-    <?php endif; ?>
+  <?php endif; ?>
 
-  </section>
+</section>
 
-  <script src="aqi.js"></script>
-  <script>
-    const dataInicial = "<?php echo $data_inicial; ?>";
-    const dataFinal   = "<?php echo $data_final; ?>";
-  </script>
+<script>
+  const dataInicial = "<?php echo $data_inicial; ?>";
+  const dataFinal   = "<?php echo $data_final; ?>";
+</script>
 
 </body>
 </html>

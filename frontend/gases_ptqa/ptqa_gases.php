@@ -1,25 +1,33 @@
 <?php
 // Conectar ao banco de dados
-include 'conecta_mysql.php';  // Substitua pelo arquivo de conexão real
+include 'conecta_mysql.php';
 
-// Definir as variáveis para as datas
+// Definir datas padrão
 $data_inicial = $_GET['inicio'] ?? '2025-06-01';
-$data_final = $_GET['fim'] ?? '2025-06-30';
+$data_final   = $_GET['fim'] ?? '2025-06-30';
 
-// Realiza a consulta para TVOC > 200 ppb
+/* =====================================================
+   1) TVOC > 200 ppb — DATA E HORA FORMATADAS
+   ===================================================== */
 $sql1 = "SELECT 
-            CONCAT(dataleitura, ' ', horaleitura) AS datahora,
+            CONCAT(
+                DATE_FORMAT(dataleitura, '%d/%m/%Y'),
+                ' ',
+                DATE_FORMAT(horaleitura, '%H:%i:%s')
+            ) AS datahora,
             tvoc
          FROM leituraptqa
          WHERE dataleitura BETWEEN :inicio AND :fim
            AND tvoc > 200
-         ORDER BY dataleitura, horaleitura ASC";
+         ORDER BY dataleitura ASC, horaleitura ASC";
 
 $stmt1 = $conecta->prepare($sql1);
 $stmt1->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $resultado_gases = $stmt1->fetchAll(PDO::FETCH_ASSOC);
 
-// Realiza a consulta para a média de TVOC agrupada por AQI
+/* =====================================================
+   2) MÉDIA TVOC AGRUPADA POR AQI
+   ===================================================== */
 $sql2 = "SELECT 
             aqi,
             AVG(tvoc) AS media_tvoc
@@ -33,17 +41,20 @@ $stmt2 = $conecta->prepare($sql2);
 $stmt2->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $resultado_media_aqi = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
-// Se a consulta retornar os dados corretamente, transmitimos para o JavaScript em formato JSON
+/* =====================================================
+   JSON PARA O JAVASCRIPT
+   ===================================================== */
 if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     header('Content-Type: application/json; charset=utf-8');
+
     echo json_encode([
         'gases_acima_200' => $resultado_gases,
         'media_aqi' => $resultado_media_aqi
-    ]);
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
     exit;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -51,165 +62,105 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     <title>Gráfico TVOC</title>
     <link rel="stylesheet" href="../../frontend/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .grafico-section {
-            width: 80%;
-            margin: 0 auto;
-            text-align: center;
-        }
-        canvas {
-            max-width: 100%;
-            height: 400px;
-        }
+        body { font-family: Arial, sans-serif; }
+        canvas { max-width: 100%; height: 400px; }
     </style>
-
 </head>
+
 <body>
-    
-    <header>
-        <nav class="navbar">
-            <div class="logo">IFSC <span>Chapecó</span></div>
-            <ul class="nav-links">
-                <li><a href="../index.html">Início</a></li>
-            </ul>
-        </nav>
-    </header>   
 
-    <div class="sidebar">
-        <h2>Menu</h2>
-            <a href="../aqi_ptqa/ptqa_aqi.php">Qualidade do ar</a>
-            <a href="../co2_ptqa/co2.php">Emissões de CO2</a>
-            <a href="../gases_ptqa/ptqa_gases.php">Gases Voláteis</a>
-            <a href="../pressao_ptqa/pressao_ptqa.php">Pressão atmosférica</a>
-            <a href="../temperatura_ptqa/temperature.php">Temperatura e umidade</a>
-    </div>
+<header>
+    <nav class="navbar">
+        <div class="logo">IFSC <span>Chapecó</span></div>
+        <ul class="nav-links">
+            <li><a href="../index.html">Início</a></li>
+        </ul>
+    </nav>
+</header>
 
-    <!-- Seção do gráfico -->
-    <section class="content" >
-        <h1>Gráfico de TVOC Acima de 200 ppb</h1>
+<div class="sidebar">
+    <h2>Menu</h2>
+    <a href="../aqi_ptqa/ptqa_aqi.php">Qualidade do ar</a>
+    <a href="../co2_ptqa/co2.php">Emissões de CO2</a>
+    <a href="../gases_ptqa/ptqa_gases.php">Gases Voláteis</a>
+    <a href="../pressao_ptqa/pressao_ptqa.php">Pressão atmosférica</a>
+    <a href="../temperatura_ptqa/temperature.php">Temperatura e umidade</a>
+</div>
 
-        <!-- Filtro de datas -->
-        <form id="formPeriodo" >
-            <label>Data inicial:</label>
-            <input type="date" name="inicio" value="<?php echo $data_inicial; ?>">
-            <label>Data final:</label>
-            <input type="date" name="fim" value="<?php echo $data_final; ?>">
-            <button type="submit">Filtrar</button>
-        </form>
+<section class="content">
+    <h1>Gráfico de TVOC Acima de 200 ppb</h1>
 
-        <!-- Exibe o gráfico -->
-        <h2>TVOC acima de 200 ppb</h2>
-        <canvas id="graficoGasesAcima"></canvas>
+    <form id="formPeriodo">
+        <label>Data inicial:</label>
+        <input type="date" name="inicio" value="<?= $data_inicial ?>">
+        <label>Data final:</label>
+        <input type="date" name="fim" value="<?= $data_final ?>">
+        <button type="submit">Filtrar</button>
+    </form>
 
-        <!-- Gráfico para Média por AQI -->
-        <h2>Média de TVOC agrupada por AQI</h2>
-        <canvas id="graficoMediaAQI"></canvas>
+    <h2>TVOC acima de 200 ppb</h2>
+    <canvas id="graficoGasesAcima"></canvas>
 
-    </section>
+    <h2>Média de TVOC agrupada por AQI</h2>
+    <canvas id="graficoMediaAQI"></canvas>
+</section>
 
-    <script>
-        // Passando as variáveis PHP para o JavaScript corretamente
-        const dataInicial = "<?php echo $data_inicial; ?>";
-        const dataFinal = "<?php echo $data_final; ?>";
+<script>
+const dataInicial = "<?= $data_inicial ?>";
+const dataFinal   = "<?= $data_final ?>";
 
-        // Função que irá buscar os dados do PHP e criar o gráfico
-        window.addEventListener("DOMContentLoaded", () => {
-            const loading = document.getElementById("loading");
+document.addEventListener("DOMContentLoaded", () => {
 
-            // Define a URL para obter os dados em JSON
-            fetch(`<?php echo $_SERVER['PHP_SELF']; ?>?inicio=${dataInicial}&fim=${dataFinal}&formato=json`)
-                .then(res => res.json())
-                .then(dados => {
-                    // Caso os dados existam
-                    if (!dados.gases_acima_200 || !dados.media_aqi) {
-                        alert("Nenhum dado encontrado para o período informado.");
-                        return;
-                    }
+    fetch(`<?= $_SERVER['PHP_SELF'] ?>?inicio=${dataInicial}&fim=${dataFinal}&formato=json`)
+        .then(r => r.json())
+        .then(dados => {
 
-                    // -------------------------------
-                    // GRÁFICO 1 — TVOC ACIMA DE 200 ppb
-                    // -------------------------------
-                    const labels1 = dados.gases_acima_200.map(d => d.datahora);
-                    const valores1 = dados.gases_acima_200.map(d => parseFloat(d.tvoc));
+            /* -------------------------------
+               GRÁFICO 1 — TVOC > 200 ppb
+               ------------------------------- */
+            const labels1 = dados.gases_acima_200.map(d => d.datahora);
+            const valores1 = dados.gases_acima_200.map(d => Number(d.tvoc));
 
-                    const canvas1 = document.getElementById("graficoGasesAcima");
-                    const ctx1 = canvas1.getContext("2d");
+            new Chart(document.getElementById("graficoGasesAcima"), {
+                type: "line",
+                data: {
+                    labels: labels1,
+                    datasets: [{
+                        label: "TVOC > 200 ppb",
+                        data: valores1,
+                        borderColor: "red",
+                        backgroundColor: "rgba(255, 0, 0, 0.2)",
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3
+                    }]
+                }
+            });
 
-                    new Chart(ctx1, {
-                        type: "line",
-                        data: {
-                            labels: labels1,
-                            datasets: [{
-                                label: "TVOC > 200 ppb",
-                                data: valores1,
-                                borderColor: "rgba(255, 99, 132, 1)",
-                                backgroundColor: "rgba(255, 99, 132, 0.2)",
-                                fill: true,
-                                tension: 0.3,
-                                pointRadius: 3
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                x: {
-                                    title: { display: true, text: "Data e Hora" },
-                                    ticks: { autoSkip: true, maxTicksLimit: 10 }
-                                },
-                                y: {
-                                    title: { display: true, text: "TVOC (ppb)" },
-                                    beginAtZero: true
-                                }
-                            },
-                            plugins: {
-                                legend: { display: true, position: "top" },
-                                title: { display: true, text: "TVOC Acima de 200 ppb" }
-                            }
-                        }
-                    });
+            /* -------------------------------
+               GRÁFICO 2 — MÉDIA TVOC / AQI
+               ------------------------------- */
+            const labels2 = dados.media_aqi.map(d => "AQI " + d.aqi);
+            const valores2 = dados.media_aqi.map(d => Number(d.media_tvoc));
 
-                    // -------------------------------
-                    // GRÁFICO 2 — MÉDIA DE TVOC AGRUPADA POR AQI
-                    // -------------------------------
-                    const labels2 = dados.media_aqi.map(d => "AQI " + d.aqi);
-                    const valores2 = dados.media_aqi.map(d => parseFloat(d.media_tvoc));
+            new Chart(document.getElementById("graficoMediaAQI"), {
+                type: "bar",
+                data: {
+                    labels: labels2,
+                    datasets: [{
+                        label: "Média TVOC (ppb)",
+                        data: valores2,
+                        backgroundColor: "blue"
+                    }]
+                }
+            });
 
-                    const canvas2 = document.getElementById("graficoMediaAQI");
-                    const ctx2 = canvas2.getContext("2d");
+        })
+        .catch(() => alert("Erro ao carregar os dados."));
+});
+</script>
 
-                    new Chart(ctx2, {
-                        type: "bar",
-                        data: {
-                            labels: labels2,
-                            datasets: [{
-                                label: "Média de TVOC (ppb)",
-                                data: valores2,
-                                backgroundColor: "rgba(30, 150, 255, 0.5)",
-                                borderColor: "rgba(30, 150, 255, 1)",
-                                borderWidth: 2
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                x: { title: { display: true, text: "AQI" } },
-                                y: { title: { display: true, text: "Média de TVOC (ppb)" }, beginAtZero: true }
-                            },
-                            plugins: {
-                                legend: { display: true, position: "top" },
-                                title: { display: true, text: "Média de TVOC Agrupada por AQI" }
-                            }
-                        }
-                    });
-
-                })
-                .catch(() => {
-                    alert("Erro ao carregar os dados.");
-                });
-        });
-    </script>
 </body>
 </html>
