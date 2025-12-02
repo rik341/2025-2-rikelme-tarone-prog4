@@ -9,8 +9,8 @@ $data_final   = $_GET['fim'] ?? '2025-06-30';
    1) DATA, HORA E TEMPERATURA – ORDEM CRESCENTE
    ===================================================== */
 $sql1 = "SELECT 
-            dataleitura AS data,
-            horaleitura AS hora,
+            DATE_FORMAT(STR_TO_DATE(dataleitura, '%Y-%m-%d'), '%d/%m/%Y') AS data,
+            DATE_FORMAT(STR_TO_DATE(horaleitura, '%H:%i:%s'), '%H:%i') AS hora,
             temperatura
          FROM leituraptqa
          WHERE dataleitura BETWEEN :inicio AND :fim
@@ -49,8 +49,8 @@ $max_min_med = $stmt3->fetch(PDO::FETCH_ASSOC);
    4) UMIDADE > 70% – ORDEM DECRESCENTE
    ===================================================== */
 $sql4 = "SELECT 
-            dataleitura AS data,
-            horaleitura AS hora,
+            DATE_FORMAT(STR_TO_DATE(dataleitura, '%Y-%m-%d'), '%d/%m/%Y') AS data,
+            DATE_FORMAT(STR_TO_DATE(horaleitura, '%H:%i:%s'), '%H:%i') AS hora,
             umidade
          FROM leituraptqa
          WHERE dataleitura BETWEEN :inicio AND :fim
@@ -106,6 +106,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     <nav class="navbar">
         <div class="logo">IFSC <span>Chapecó</span></div>
         <ul class="nav-links">
+            <li><a href="../temperatura_interna_mabel/temp_interna.php">Mabel</a></li>
             <li><a href="../index.html">Início</a></li>
         </ul>
     </nav>
@@ -123,18 +124,24 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 <div class="content">
     <h1>Gráficos de Temperatura</h1>
 
-    <form if= "formperiodo">
+    <form id="formPeriodo">
         <label>Início:</label>
         <input type="date" name="inicio" value="<?= $data_inicial ?>">
         <label>Fim:</label>
         <input type="date" name="fim" value="<?= $data_final ?>">
+      <label>Intervalo:</label>
+<input type="number" id="intervalo" name="intervalo" value="<?= $_GET['intervalo'] ?? 20 ?>" min="1">
+
+
         <button type="submit">Filtrar</button>
     </form>
 
     <div id="loading">Carregando dados...</div>
 
-    <h2>Temperatura Média</h2>
-    <p id="valorMedia">Carregando...</p>
+    <div id="mediaContainer" class="media-box">
+            <strong>temperatura média</strong> 
+            <span id="valorMedia">--</span> °C
+        </div>
 
     <h2>Temperatura ao longo do tempo</h2>
     <canvas id="graficoTemperatura" height="400"></canvas>
