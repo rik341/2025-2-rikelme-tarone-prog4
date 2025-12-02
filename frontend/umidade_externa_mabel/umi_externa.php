@@ -93,7 +93,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
         <input type="date" id="fim" value="2025-06-07">
     </label>
 
-    <label>Intervalo:
+    <label>Intervalo de Leitura:
         <input type="number" id="intervalo" value="20" min="1">
     </label>
 
