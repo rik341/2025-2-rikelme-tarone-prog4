@@ -1,14 +1,11 @@
 <?php
-// Conectar ao banco de dados
 include 'conecta_mysql.php';
 
-// Definir datas padrão
 $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
+$intervalo    = $_GET['intervalo'] ?? 20;   // <<< AQUI ESTAVA FALTANDO
 
-/* =====================================================
-   1) TVOC > 200 ppb — DATA E HORA FORMATADAS
-   ===================================================== */
+/* TVOC > 200 */
 $sql1 = "SELECT 
             CONCAT(
                 DATE_FORMAT(dataleitura, '%d/%m/%Y'),
@@ -25,15 +22,12 @@ $stmt1 = $conecta->prepare($sql1);
 $stmt1->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $resultado_gases = $stmt1->fetchAll(PDO::FETCH_ASSOC);
 
-/* =====================================================
-   2) MÉDIA TVOC AGRUPADA POR AQI
-   ===================================================== */
+/* Média por AQI */
 $sql2 = "SELECT 
             aqi,
             AVG(tvoc) AS media_tvoc
          FROM leituraptqa
          WHERE dataleitura BETWEEN :inicio AND :fim
-           AND tvoc IS NOT NULL
          GROUP BY aqi
          ORDER BY aqi ASC";
 
@@ -41,17 +35,13 @@ $stmt2 = $conecta->prepare($sql2);
 $stmt2->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $resultado_media_aqi = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
-/* =====================================================
-   JSON PARA O JAVASCRIPT
-   ===================================================== */
+/* JSON para o JS */
 if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     header('Content-Type: application/json; charset=utf-8');
-
     echo json_encode([
         'gases_acima_200' => $resultado_gases,
         'media_aqi' => $resultado_media_aqi
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-
     exit;
 }
 ?>
@@ -75,6 +65,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     <nav class="navbar">
         <div class="logo">IFSC <span>Chapecó</span></div>
         <ul class="nav-links">
+            <li><a href="../temperatura_interna_mabel/temp_interna.php">Mabel</a></li>
             <li><a href="../index.html">Início</a></li>
         </ul>
     </nav>
@@ -95,8 +86,13 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     <form id="formPeriodo">
         <label>Data inicial:</label>
         <input type="date" name="inicio" value="<?= $data_inicial ?>">
+
         <label>Data final:</label>
         <input type="date" name="fim" value="<?= $data_final ?>">
+
+        <label>Intervalo de leituras:</label>
+        <input type="number" id="intervalo" name="intervalo" value="<?= $intervalo ?>">
+
         <button type="submit">Filtrar</button>
     </form>
 
@@ -107,60 +103,15 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     <canvas id="graficoMediaAQI"></canvas>
 </section>
 
+<!-- Variáveis enviadas para o JS -->
 <script>
 const dataInicial = "<?= $data_inicial ?>";
 const dataFinal   = "<?= $data_final ?>";
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    fetch(`<?= $_SERVER['PHP_SELF'] ?>?inicio=${dataInicial}&fim=${dataFinal}&formato=json`)
-        .then(r => r.json())
-        .then(dados => {
-
-            /* -------------------------------
-               GRÁFICO 1 — TVOC > 200 ppb
-               ------------------------------- */
-            const labels1 = dados.gases_acima_200.map(d => d.datahora);
-            const valores1 = dados.gases_acima_200.map(d => Number(d.tvoc));
-
-            new Chart(document.getElementById("graficoGasesAcima"), {
-                type: "line",
-                data: {
-                    labels: labels1,
-                    datasets: [{
-                        label: "TVOC > 200 ppb",
-                        data: valores1,
-                        borderColor: "red",
-                        backgroundColor: "rgba(255, 0, 0, 0.2)",
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 3
-                    }]
-                }
-            });
-
-            /* -------------------------------
-               GRÁFICO 2 — MÉDIA TVOC / AQI
-               ------------------------------- */
-            const labels2 = dados.media_aqi.map(d => "AQI " + d.aqi);
-            const valores2 = dados.media_aqi.map(d => Number(d.media_tvoc));
-
-            new Chart(document.getElementById("graficoMediaAQI"), {
-                type: "bar",
-                data: {
-                    labels: labels2,
-                    datasets: [{
-                        label: "Média TVOC (ppb)",
-                        data: valores2,
-                        backgroundColor: "blue"
-                    }]
-                }
-            });
-
-        })
-        .catch(() => alert("Erro ao carregar os dados."));
-});
+const urlBase     = "<?= $_SERVER['PHP_SELF'] ?>";
+const intervaloPadrao = <?= $intervalo ?>;
 </script>
+
+<script src="gases.js"></script>
 
 </body>
 </html>

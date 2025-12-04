@@ -68,6 +68,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     <nav class="navbar">
         <div class="logo">IFSC <span>Chapecó</span></div>
         <ul class="nav-links">
+            <li><a href="../aqi_ptqa/ptqa_aqi.php">PTQA</a></li>
             <li><a href="../index.html">Início</a></li>
         </ul>
     </nav>

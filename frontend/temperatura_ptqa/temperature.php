@@ -136,13 +136,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 
 <div class="content">
     <h1>Gráficos de Temperatura</h1>
-
-<<<<<<< Updated upstream
     <form id="formPeriodo">
-=======
-    <!-- Corrigido o "if" e o atributo do formulário -->
-    <form method="get" action="temperature.php">
->>>>>>> Stashed changes
         <label>Início:</label>
         <input type="date" name="inicio" value="<?= $data_inicial ?>">
         <label>Fim:</label>
