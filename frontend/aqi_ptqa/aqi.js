@@ -4,6 +4,8 @@ window.addEventListener("load", () => {
     const intervaloInput = document.getElementById("intervalo");
     let chartAqi = null;
 
+    //converte as datas no formato brasileiro
+
     function converterParaDateBrasil(dataStr) {
         const [data, hora] = dataStr.split(" ");
         const [dia, mes, ano] = data.split("/");
@@ -25,6 +27,7 @@ window.addEventListener("load", () => {
     // AGORA FUNCIONA — intervalo lido corretamente
     const intervaloUsado = parseInt(intervaloInput.value) || 20;
 
+//pega dados php
     fetch(`ptqa_aqi.php?inicio=${dataInicial}&fim=${dataFinal}&formato=json`)
         .then(res => res.json())
         .then(dados => {

@@ -1,6 +1,6 @@
 <?php
 include 'conecta_mysql.php';
-// Define o período padrão
+// define o período
 $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
 
@@ -8,9 +8,8 @@ $data_final   = $_GET['fim'] ?? '2025-06-30';
 $intervalo = isset($_GET['intervalo']) && (int)$_GET['intervalo'] > 0 ? (int)$_GET['intervalo'] : 20;
 
 
-// ---------------------------
-// CONSULTA 1 — AQI ≥ 4
-// ---------------------------
+
+// CONSULTA 1 
 $sql = "SELECT 
           DATE_FORMAT(CONCAT(dataleitura, ' ', horaleitura), '%d/%m/%Y %H:%i:%s') AS datahora_completa,
           aqi
@@ -23,9 +22,8 @@ $stmt = $conecta->prepare($sql);
 $stmt->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $resultado_ruim = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// ---------------------------
-// CONSULTA 2 — AQI = 1 (PRIMEIRA LEITURA DO DIA)
-// ---------------------------
+// CONSULTA 2 (PRIMEIRA LEITURA DO DIA)
+
 $sql2 = "SELECT 
             DATE_FORMAT(t1.dataleitura, '%d/%m/%Y') AS dataleitura,
             t1.horaleitura,
@@ -49,9 +47,9 @@ $stmt2 = $conecta->prepare($sql2);
 $stmt2->execute([':inicio' => $data_inicial, ':fim' => $data_final]);
 $resultado_otimo = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
-// ---------------------------
-// RETORNO JSON PARA O GRÁFICO
-// ---------------------------
+
+// retorno json
+
 if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
   header('Content-Type: application/json; charset=utf-8');
   echo json_encode([
@@ -121,11 +119,11 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 
   <div class="loading" id="loading">Carregando dados...</div>
 
-  <!-- GRÁFICO AQI ≥ 4 -->
+  <!-- GRÁFICO -->
   <h2>Registros de Baixa Qualidade do Ar (AQI ≥ 4)</h2>
   <canvas id="graficoAqi"></canvas>
 
-  <!-- TABELA AQI = 1 -->
+  <!-- TABELA-->
   <h2>Registros de Ótima Qualidade do Ar (AQI = 1)</h2>
 
   <?php if (count($resultado_otimo) === 0): ?>
