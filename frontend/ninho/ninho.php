@@ -117,7 +117,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
             <span id="valormax">--</span> °C
         </div>
         
-        <div>
+        <div id="mediaContainer" class="media-box">
             <strong>temperatura mínima do ninho</strong>
             <span id="valormin">--</span> °C
         </div>

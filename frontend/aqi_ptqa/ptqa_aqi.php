@@ -1,9 +1,12 @@
 <?php
 include 'conecta_mysql.php';
-
 // Define o período padrão
 $data_inicial = $_GET['inicio'] ?? '2025-06-01';
 $data_final   = $_GET['fim'] ?? '2025-06-30';
+
+// captura intervalo (padrão 20)
+$intervalo = isset($_GET['intervalo']) && (int)$_GET['intervalo'] > 0 ? (int)$_GET['intervalo'] : 20;
+
 
 // ---------------------------
 // CONSULTA 1 — AQI ≥ 4
@@ -82,6 +85,7 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
     <nav class="navbar">
         <div class="logo">IFSC <span>Chapecó</span></div>
         <ul class="nav-links">
+            <li><a href="../temperatura_interna_mabel/temp_interna.php">Mabel</a></li>
             <li><a href="../index.html">Início</a></li>
         </ul>
     </nav>
@@ -100,14 +104,20 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 
   <h1>Registros de Qualidade do Ar</h1>
 
-  <!-- Filtro -->
-  <form id="formprojeto">
+ <form id="formPeriodo" method="get" action="ptqa_aqi.php">
     <label>Data inicial:</label>
-    <input type="date" name="inicio" value="<?php echo $data_inicial; ?>">
+    <input type="date" name="inicio" value="<?php echo htmlspecialchars($data_inicial); ?>">
+
     <label>Data final:</label>
-    <input type="date" name="fim" value="<?php echo $data_final; ?>">
+    <input type="date" name="fim" value="<?php echo htmlspecialchars($data_final); ?>">
+
+    <label for="intervalo">Intervalo (n):</label>
+    <input id="intervalo" name="intervalo" type="number" min="1" step="1" value="<?php echo $intervalo; ?>" style="width:80px">
+
     <button type="submit">Filtrar</button>
-  </form>
+</form>
+
+
 
   <div class="loading" id="loading">Carregando dados...</div>
 
@@ -150,7 +160,9 @@ if (isset($_GET['formato']) && $_GET['formato'] === 'json') {
 <script>
   const dataInicial = "<?php echo $data_inicial; ?>";
   const dataFinal   = "<?php echo $data_final; ?>";
+  const intervalo   = <?php echo $intervalo; ?>;
 </script>
+
 
 </body>
 </html>
