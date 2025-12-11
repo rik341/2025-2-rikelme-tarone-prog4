@@ -286,6 +286,13 @@ canvas {
   margin: 0 auto 30px;
 }
 
+.linha2 {
+  width: 60px;
+  height: 3px;
+  background-color: #0c3e1e;
+  margin: 0 auto 30px;
+}
+
 .cards-projetos {
   display: flex;
   justify-content: center;
@@ -408,4 +415,111 @@ tbody td {
 
 tbody tr:last-child td {
   border-bottom: none;
+}
+
+
+#area-projeto-e-abelha {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+#coluna-projeto,
+#coluna-abelha {
+    width: 50%;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+#coluna-projeto:hover,
+#coluna-abelha:hover {
+    transform: scale(1.03);              
+    box-shadow: 0 0 12px rgba(0,0,0,0.25); 
+}
+
+#coluna-projeto h2,
+#coluna-abelha h2 {
+    margin-top: 0;
+    color: #0c3e1e;
+    text-align: center;
+}
+
+#coluna-projeto p,
+#coluna-abelha p {
+    line-height: 1.45;
+    font-size: 15px;
+    color: #333;
+}
+
+
+
+#sobreprojetos  {
+  font-size: 26px;
+  margin-bottom: 20px;
+  color: #0c3e1e;
+  text-align: center;
+}
+#barra-projetos {
+    width: 70px;       
+    height: 3px;        
+    background: #0c3e1e; 
+    margin: 0 auto;     
+    border-radius: 2px; 
+}
+
+#area-ptqa {
+    width: 100%;
+    background: linear-gradient(to bottom, var(--cor-primaria) 0%, #1d6b2f 100%);
+    padding: 60px 0;
+    display: flex;
+    justify-content: center;
+}
+
+/* Centraliza tudo */
+#conteudo-ptqa {
+    width: 90%;
+    max-width: 1000px;
+    text-align: center;
+}
+
+/* Título */
+#titulo-ptqa {
+    color: white;
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+/* Barrinha */
+#barra-ptqa {
+    width: 60px;
+    height: 3px;
+    background: white;
+    margin: 0 auto 30px auto;
+    border-radius: 2px;
+}
+
+/* Caixa branca */
+#caixa-ptqa {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.15);
+    transition: transform .25s, box-shadow .25s;
+}
+
+/* Hover */
+#caixa-ptqa:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 14px rgba(0,0,0,0.25);
+}
+
+#caixa-ptqa h3 {
+    color: #0c3e1e;
+    margin-top: 0;
 }
